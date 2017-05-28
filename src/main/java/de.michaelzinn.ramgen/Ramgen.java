@@ -342,7 +342,7 @@ public class Ramgen {
         println("Generated " + generatedFunctions.size() + " functions.");
         println();
         println(markdownTable);
-        generatedFunctions.forEach(System.out::println);
+        //generatedFunctions.forEach(System.out::println);
 
 //        println(join("\n\n", generateHepgargars(10)));
     }

@@ -35,333 +35,151 @@
 
 	"functions": [
 		{
-			"signature": {
-				"generics": [],
-				"type": "Integer", 
-				"name": "add",
-				"parameters": ["Integer", "x", "Integer", "y"]
-			},
+			"signature": { "generics": [], "type": "Integer", "name": "add", "parameters": ["Integer", "x", "Integer", "y"] },
 			"status": "works"
 		},
 		{
-			"signature": {
-				"generics": ["A"],
-				"type": "List<A>",
-				"name": "adjust",
-				"parameters": ["Function1<A, A>", "f", "Integer", "index", "List<A>", "list"]
-			},
+			"signature": { "generics": ["A"], "type": "List<A>", "name": "adjust", "parameters": ["Function1<A, A>", "f", "Integer", "index", "List<A>", "list"] },
 			"status": "works"
 		},
 		{
-			"signature": {
-				"generics": ["A"],
-				"type": "Boolean",
-				"name": "all",
-				"parameters": ["Predicate<A>", "predicate", "List<A>", "list"]
-			},
+			"signature": { "generics": ["A"], "type": "Boolean", "name": "all", "parameters": ["Predicate<A>", "predicate", "List<A>", "list"] },
 			"status": "works"
 		},
 		{
-			"signature": {
-				"generics": ["A", "B"],
-				"type": "A",
-				"name": "always",
-				"parameters": ["A", "a", "B", "ignore"]
-			},
+			"signature": { "generics": ["A", "B"], "type": "A", "name": "always", "parameters": ["A", "a", "B", "ignore"] },
 			"status": "works"
 		},
 		{
-			"signature": {
-				"generics": ["A"],
-				"type": "Boolean",
-				"name": "any",
-				"parameters": ["Predicate<A>", "predicate", "List<A>", "list"]
-			},
+			"signature": { "generics": ["A"], "type": "Boolean", "name": "any", "parameters": ["Predicate<A>", "predicate", "List<A>", "list"] },
 			"status": "works"
 		},
 		{
-			"signature": {
-				"generics": ["A", "B"],
-				"type": "List<B>",
-				"name": "ap",
-				"parameters": ["List<Function1<A, B>>", "fs", "List<A>", "as"]
-			},
+			"signature": { "generics": ["A", "B"], "type": "List<B>", "name": "ap", "parameters": ["List<Function1<A, B>>", "fs", "List<A>", "as"] },
 			"status": "incomplete",
 			"comment": "Only works on Lists."
 		},
 		{
-			"signature": {
-				"generics": ["L", "R", "T"],
-				"type": "T",
-				"name": "applyTuple",
-				"parameters": ["BiFunction<L, R, T>", "f", "Tuple2<L,R>", "tuple"]
-			},
+			"signature": { "generics": ["L", "R", "T"], "type": "T", "name": "applyTuple", "parameters": ["BiFunction<L, R, T>", "f", "Tuple2<L,R>", "tuple"] },
 			"status": "incomplete",
 			"comment": "Only works on Tuples of size 2. Will be fixed."
 		},
 		{
-			"signature": {
-				"generics": ["A"],
-				"type": "Predicate<A>",
-				"name": "complement",
-				"parameters": ["Predicate<A>", "predicate"]
-			},
+			"signature": { "generics": ["A"], "type": "Predicate<A>", "name": "complement", "parameters": ["Predicate<A>", "predicate"] },
 			"status": "works"
 		},
 		{
-			"signature": {
-				"generics": ["A"],
-				"type": "List<A>",
-				"name": "concat",
-				"parameters": ["List<A>", "list1", "List<A>", "list2"]
-			},
+			"signature": { "generics": ["A"], "type": "List<A>", "name": "concat", "parameters": ["List<A>", "list1", "List<A>", "list2"] },
 			"status": "works"
 		},
 		{
-			"signature": {
-				"generics": ["A"],
-				"type": "Boolean",
-				"name": "contains",
-				"parameters": ["A", "a", "List<A>", "list"]
-			},
+			"signature": { "generics": ["A"], "type": "List<A>", "name": "concatOptions", "parameters": ["List<Option<A>>"] },
+			"status": "bonus"
+		},
+		{
+			"signature": { "generics": ["A"], "type": "Boolean", "name": "contains", "parameters": ["A", "a", "List<A>", "list"] },
 			"status": "works"
 		},
 		{
-			"signature": {
-				"generics": ["A"],
-				"type": "A",
-				"name": "defaultTo",
-				"parameters": ["A", "a", "Option<A>", "optionA"]
-			},
+			"signature": { "generics": ["A"], "type": "A", "name": "defaultTo", "parameters": ["A", "a", "Option<A>", "optionA"] },
 			"status": "works"
 		},
 		{
-			"signature": {
-				"generics": ["A"],
-				"type": "Boolean",
-				"name": "eq",
-				"parameters": ["A", "a1", "A", "a2"]
-			},
+			"signature": { "generics": ["A"], "type": "Boolean", "name": "eq", "parameters": ["A", "a1", "A", "a2"] }, "status": "works"
+		},
+		{
+			"signature": { "generics": ["A"], "type": "List<A>", "name": "filter", "parameters": ["Predicate<A>", "p", "List<A>", "list"] },
 			"status": "works"
 		},
 		{
-			"signature": {
-				"generics": ["A"],
-				"type": "List<A>",
-				"name": "filter",
-				"parameters": ["Predicate<A>", "p", "List<A>", "list"]
-			},
+			"signature": { "generics": ["A"], "type": "Integer", "name": "findIndex", "parameters": ["Predicate<A>", "predicate", "List<A>", "list"] },
 			"status": "works"
 		},
 		{
-			"signature": {
-				"generics": ["A"],
-				"type": "Integer",
-				"name": "findIndex",
-				"parameters": ["Predicate<A>", "predicate", "List<A>", "list"]
-			},
-			"status": "works"
-		},
-		{
-			"signature": {
-				"generics": ["A", "B"],
-				"type": "List<B>",
-				"name": "flatMap",
-				"parameters": ["Function1<A, List<B>>", "f", "List<A>", "ma"]
-			},
+			"signature": { "generics": ["A", "B"], "type": "List<B>", "name": "flatMap", "parameters": ["Function1<A, List<B>>", "f", "List<A>", "ma"] },
 			"status": "incomplete",
 			"comment": "Only for lists?"
 		},
 		{
-			"signature": {
-				"generics": ["A"],
-				"type": "List<A>",
-				"name": "forEach",
-				"parameters": ["Consumer<A>", "consumer", "List<A>", "list"]
+			"signature": { "generics": ["A"], "type": "List<A>", "name": "forEach", "parameters": ["Consumer<A>", "consumer", "List<A>", "list"] },
+			"status": "works"
+		},
+		{
+			"signature": { "generics": ["S", "A"], "type": "A", "name": "get", "parameters": ["Lens<S, A>", "lens", "S", "s"] },
+			"status": "works"
+		},
+		{
+			"signature": { "generics": ["A"], "type": "Option<A>", "name": "head", "parameters": ["List<A>", "list"] },
+			"status": "works"
+		},
+		{
+			"signature": { "generics": ["A", "B"], 
+				"type": "B", "name": "ifElse", "parameters": [ "Predicate<A>", "predicate", "Function<A, B>", "then", "Function<A, B>", "els", "A", "value" ]
 			},
 			"status": "works"
 		},
 		{
-			"signature": {
-				"generics": ["S", "A"],
-				"type": "A",
-				"name": "get",
-				"parameters": ["Lens<S, A>", "lens", "S", "s"]
-			},
+			"signature": { "generics": ["A"], "type": "Boolean", "name": "isNone", "parameters": ["Option<A>", "any"] },
+			"status": "works",
+			"comment": "Replacement for isNil, returns true for Option.none()."
+		},
+		{
+			"signature": { "generics": ["A"], "type": "Boolean", "name": "isSome", "parameters": ["Option<A>", "any"] },
+			"status": "works",
+			"comment": "Replacement for complement(isNil), returns true for Option.some(\"whatever\")."
+		},
+		{
+			"signature": { "generics": ["A"], "type": "String", "name": "join", "parameters": ["String", "joiner", "List<A>", "list"] },
 			"status": "works"
 		},
 		{
-			"signature": {
-				"generics": ["A"],
-				"type": "Option<A>",
-				"name": "head",
-				"parameters": ["List<A>", "list"]
-			},
-			"status": "works"
-		},
-		{
-			"signature": {
-				"generics": ["A", "B"],
-				"type": "B",
-				"name": "ifElse",
-				"parameters": [
-					"Predicate<A>", "predicate",
-					"Function<A, B>", "then",
-					"Function<A, B>", "els",
-					"A", "value"
-				]
-			},
-			"status": "works"
-		},
-		{
-			"signature": {
-				"generics": ["A"],
-				"type": "Boolean",
-				"name": "isNone",
-				"parameters": ["Option<A>", "any"]
-			},
-			"status": "works"
-		},
-		{
-			"signature": {
-				"generics": ["A"],
-				"type": "Boolean",
-				"name": "isSome",
-				"parameters": ["Option<A>", "any"]
-			},
-			"status": "works"
-		},
-		{
-			"signature": {
-				"generics": ["A"],
-				"type": "String",
-				"name": "join",
-				"parameters": ["String", "joiner", "List<A>", "list"]
-			},
-			"status": "works"
-		},
-		{
-			"signature": {
-				"generics": ["A"],
-				"type": "Option<String>",
-				"name": "joinOption",
-				"parameters": ["String", "joiner", "List<A>", "list"]
-			},
+			"signature": { "generics": ["A"], "type": "Option<String>", "name": "joinOption", "parameters": ["String", "joiner", "List<A>", "list"] },
 			"status": "bonus",
 			"comment": "Like join, except that it returns nothing when joining empty lists."
 		},
 		{
-			"signature": {
-				"generics": ["S", "A"],
-				"type": "Lens<S, A>",
-				"name": "lens",
-				"parameters": ["Function1<S, A>", "getter", "BiConsumer<S, A>", "setter"]
-			},
+			"signature": { "generics": ["S", "A"], "type": "Lens<S, A>", "name": "lens", "parameters": ["Function1<S, A>", "getter", "BiConsumer<S, A>", "setter"] },
 			"generate": "nothing",
 			"status": "works"
 		},
 		{
-			"signature": {
-				"generics": ["A", "B"],
-				"type": "List<B>",
-				"name": "map",
-				"parameters": ["Function1<A, B>", "f", "List<A>", "value"]
-			},
+			"signature": { "generics": ["A", "B"], "type": "List<B>", "name": "map", "parameters": ["Function1<A, B>", "f", "List<A>", "value"] },
 			"status": "works"
 		},
 		{
-			"signature": {
-				"generics": ["A"],
-				"type": "Boolean",
-				"name": "none",
-				"parameters": ["Predicate<A>", "predicate", "List<A>", "list"]
-			},
+			"signature": { "generics": ["A"], "type": "Boolean", "name": "none", "parameters": ["Predicate<A>", "predicate", "List<A>", "list"] },
 			"status": "works"
 		},
 		{
-			"signature": {
-				"generics": ["S extends Copyable<S>", "A"],
-				"type": "S",
-				"name": "over",
-				"parameters": ["Lens<S, A>", "lens", "Function1<A, A>", "f", "S", "x"]
-			},
+			"signature": { "generics": ["S extends Copyable<S>", "A"], "type": "S", "name": "over", "parameters": ["Lens<S, A>", "lens", "Function1<A, A>", "f", "S", "x"] },
 			"status": "works"
 		},
 		{
-			"signature": {
-				"generics": ["A"],
-				"type": "List<A>",
-				"name": "reverse",
-				"parameters": ["List<A>", "list"]
-			},
+			"signature": { "generics": ["A"], "type": "List<A>", "name": "reverse", "parameters": ["List<A>", "list"] },
 			"status": "works"
 		},
 		{
-			"signature": {
-				"generics": ["S extends Copyable<S>", "A"],
-				"type": "S",
-				"name": "set",
-				"parameters": ["Lens<S, A>", "lens", "A", "value", "S", "object"]
-			},
+			"signature": { "generics": ["S extends Copyable<S>", "A"], "type": "S", "name": "set", "parameters": ["Lens<S, A>", "lens", "A", "value", "S", "object"] },
 			"status": "works"
 		},
 		{
-			"signature": {
-				"generics": ["A"],
-				"type": "List<A>",
-				"name": "tail",
-				"parameters": ["List<A>", "list"]
-			},
+			"signature": { "generics": ["A"], "type": "List<A>", "name": "tail", "parameters": ["List<A>", "list"] },
 			"status": "works"
 		},
 		{
-			"signature": {
-				"generics": [],
-				"type": "String", "name": "toLower", "parameters": ["String", "s"]
-			},
+			"signature": { "generics": [], "type": "String", "name": "toLower", "parameters": ["String", "s"] }, "status": "works" },
+		{
+			"signature": { "generics": [], "type": "String", "name": "toUpper", "parameters": ["String", "s"] }, "status": "works" },
+		{
+			"signature": { "generics": ["A", "B"], "type": "List<Tuple2<A, B>>", "name": "zip", "parameters": ["List<A>", "a", "List<B>", "b"] },
 			"status": "works"
 		},
 		{
-			"signature": {
-				"generics": [],
-				"type": "String", "name": "toUpper", "parameters": ["String", "s"]
-			},
+			"signature": { "generics": ["T", "U", "R"], "type": "List<R>", "name": "zipWith", "parameters": ["BiFunction<T, U, R>", "biFunction", "List<T>", "t", "List<U>", "u"] },
 			"status": "works"
 		},
 		{
-			"signature": {
-				"generics": ["A", "B"],
-				"type": "List<Tuple2<A, B>>",
-				"name": "zip",
-				"parameters": ["List<A>", "a", "List<B>", "b"]
-			},
-			"status": "works"
-		},
-		{
-			"signature": {
-				"generics": ["T", "U", "R"],
-				"type": "List<R>",
-				"name": "zipWith",
-				"parameters": ["BiFunction<T, U, R>", "biFunction", "List<T>", "t", "List<U>", "u"]
-			},
-			"status": "works"
-		},
-		{
-			"signature": {
-				"generics": ["T"],
-				"type": "T",
-				"name": "nullTo",
-				"parameters": ["T", "fallback", "T", "nullable"]
-			},
-			"status": "works"
-		},
-		{
-			"signature": {
-				"generics": ["A"],
-				"type": "List<A>",
-				"name": "concatOptions",
-				"parameters": ["List<Option<A>>"]
-			},
+			"signature": { "generics": ["T"], "type": "T", "name": "nullTo", "parameters": ["T", "fallback", "T", "nullable"] },
 			"status": "works"
 		}
 	]
