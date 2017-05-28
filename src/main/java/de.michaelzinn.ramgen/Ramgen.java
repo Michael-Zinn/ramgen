@@ -1,18 +1,19 @@
 package de.michaelzinn.ramgen;
 
 import de.michaelzinn.ramgen.json.*;
-import io.vavr.*;
+import io.vavr.Function1;
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.collection.Set;
 import io.vavr.control.Option;
 import lombok.val;
 
-
+import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static de.michaelzinn.ramgen.JSignature.def;
-import static de.michaelzinn.ramgen.ThreadingMacro.*;
+import static de.michaelzinn.ramgen.ThreadingMacro.doSeq;
 import static de.michaelzinn.ravr.Ravr.*;
 import static io.vavr.API.*;
 
@@ -122,19 +123,17 @@ public class Ramgen {
 
     static String toCode(JSignature sig) {
 
-        val strGenerics = t(
-                sig
-                , JSignature::getGenerics
-                , joinOption(", ")
-                , option -> option.map((String g) -> " <" + g + ">\n")
-                , defaultTo("")
+        val strGenerics = doSeq(sig,
+                JSignature::getGenerics,
+                joinOption(", "),
+                option -> option.map((String g) -> " <" + g + ">\n"),
+                defaultTo("")
         );
 
-        val strParams = t(
-                sig
-                , JSignature::getParameters
-                , map((JParameter p) -> p.type + " " + p.name)
-                , join(", ")
+        val strParams = doSeq(sig,
+                JSignature::getParameters,
+                map((JParameter p) -> p.type + " " + p.name),
+                join(", ")
         );
 
         return "public static" + strGenerics +
@@ -314,21 +313,22 @@ public class Ramgen {
 
         String markdownTable = "| Status | Function | Note |\n" +
                 "|:----:|:--------|:-----|\n" +
-                t(
-                        allNames,
-                        map(ifElse(functionMap::containsKey,
-                                pipe(functionMap::get, Option::get, function -> {
+                doSeq(allNames,
+                        map(
+                                ifElse(functionMap::containsKey,
+                                        pipe(functionMap::get, Option::get, function -> {
 
-                                    val icon = statusIdIcon.get(function.getStatus()).get();
-                                    val name = function.signature.name;
-                                    val comment = nullTo("", function.comment);
+                                            val icon = statusIdIcon.get(function.getStatus()).get();
+                                            val name = function.signature.name;
+                                            val comment = nullTo("", function.comment);
 
-                                    return "| " + icon + " | " + name + " | " + comment + "|";
-                                }),
-                                missingName -> "| " + statusIdIcon.get(
-                                        data.blacklist.contains(missingName) ? "rejected" : "missing"
-                                ).get() + " | " + missingName + " |   |"
-                        )),
+                                            return "| " + icon + " | " + name + " | " + comment + "|";
+                                        }),
+                                        missingName -> "| " + statusIdIcon.get(
+                                                data.blacklist.contains(missingName) ? "rejected" : "missing"
+                                        ).get() + " | " + missingName + " |   |"
+                                )
+                        ),
                         join("\n")
                 );
 
@@ -342,6 +342,9 @@ public class Ramgen {
         println("Generated " + generatedFunctions.size() + " functions.");
         println();
         println(markdownTable);
+
+        Boolean b = ifElse(not(), Function.identity(), always(false), true);
+
         //generatedFunctions.forEach(System.out::println);
 
 //        println(join("\n\n", generateHepgargars(10)));

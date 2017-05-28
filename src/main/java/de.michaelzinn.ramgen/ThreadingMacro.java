@@ -9,7 +9,7 @@ public class ThreadingMacro {
 
 
     public static <A>
-    A t(
+    A doSeq(
             A a
     ) {
         return a;
@@ -17,7 +17,7 @@ public class ThreadingMacro {
 
 
     public static <A, B>
-    B t(
+    B doSeq(
             A a,
             Function1<A, B> ab
     ) {
@@ -26,7 +26,7 @@ public class ThreadingMacro {
 
 
     public static <A, B, C>
-    C t(
+    C doSeq(
             A a,
             Function1<A, B> ab,
             Function1<B, C> bc
@@ -36,7 +36,7 @@ public class ThreadingMacro {
 
 
     public static <A, B, C, D>
-    D t(
+    D doSeq(
             A a,
             Function1<A, B> ab,
             Function1<B, C> bc,
@@ -47,7 +47,7 @@ public class ThreadingMacro {
 
 
     public static <A, B, C, D, E>
-    E t(
+    E doSeq(
             A a,
             Function1<A, B> ab,
             Function1<B, C> bc,
@@ -59,7 +59,7 @@ public class ThreadingMacro {
 
 
     public static <A, B, C, D, E, F>
-    F t(
+    F doSeq(
             A a,
             Function1<A, B> ab,
             Function1<B, C> bc,
@@ -72,7 +72,7 @@ public class ThreadingMacro {
 
 
     public static <A, B, C, D, E, F, G>
-    G t(
+    G doSeq(
             A a,
             Function1<A, B> ab,
             Function1<B, C> bc,
@@ -86,7 +86,7 @@ public class ThreadingMacro {
 
 
     public static <A, B, C, D, E, F, G, H>
-    H t(
+    H doSeq(
             A a,
             Function1<A, B> ab,
             Function1<B, C> bc,
@@ -101,7 +101,7 @@ public class ThreadingMacro {
 
 
     public static <A, B, C, D, E, F, G, H, I>
-    I t(
+    I doSeq(
             A a,
             Function1<A, B> ab,
             Function1<B, C> bc,
@@ -117,7 +117,7 @@ public class ThreadingMacro {
 
 
     public static <A, B, C, D, E, F, G, H, I, J>
-    J t(
+    J doSeq(
             A a,
             Function1<A, B> ab,
             Function1<B, C> bc,
@@ -134,7 +134,7 @@ public class ThreadingMacro {
 
 
     public static <A, B, C, D, E, F, G, H, I, J, K>
-    K t(
+    K doSeq(
             A a,
             Function1<A, B> ab,
             Function1<B, C> bc,

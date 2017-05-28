@@ -109,6 +109,13 @@
 			"status": "works"
 		},
 		{
+			"signature": {
+				"generics": ["A", "B"],
+				"type": "Map<B, List<A>>", "name": "groupBy", "parameters": ["Function<? super A, ? extends B>", "classifier", "List<A>", "list"]
+			},
+			"status": "works"
+		},
+		{
 			"signature": { "generics": ["A"], "type": "Option<A>", "name": "head", "parameters": ["List<A>", "list"] },
 			"status": "works"
 		},
@@ -167,9 +174,11 @@
 			"status": "works"
 		},
 		{
-			"signature": { "generics": [], "type": "String", "name": "toLower", "parameters": ["String", "s"] }, "status": "works" },
+			"signature": { "generics": [], "type": "String", "name": "toLower", "parameters": ["String", "s"] },
+			"status": "works" },
 		{
-			"signature": { "generics": [], "type": "String", "name": "toUpper", "parameters": ["String", "s"] }, "status": "works" },
+			"signature": { "generics": [], "type": "String", "name": "toUpper", "parameters": ["String", "s"] },
+			"status": "works" },
 		{
 			"signature": { "generics": ["A", "B"], "type": "List<Tuple2<A, B>>", "name": "zip", "parameters": ["List<A>", "a", "List<B>", "b"] },
 			"status": "works"
