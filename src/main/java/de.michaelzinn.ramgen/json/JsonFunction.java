@@ -7,8 +7,8 @@ import lombok.Data;
  */
 @Data
 public class JsonFunction {
+    public String generate; // "all", "none", "unique"
     public JsonSignature signature;
-    public String generate; // "all", "nothing", "unique"
     public String status;
     public String comment;
 }

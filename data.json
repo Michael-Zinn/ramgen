@@ -39,7 +39,7 @@
 			"status": "works"
 		},
 		{
-			"signature": { "generics": ["A"], "type": "List<A>", "name": "adjust", "parameters": ["Function1<A, A>", "f", "Integer", "index", "List<A>", "list"] },
+			"signature": { "generics": ["A"], "type": "List<A>", "name": "adjust", "parameters": ["Function<A, A>", "f", "Integer", "index", "List<A>", "list"] },
 			"status": "works"
 		},
 		{
@@ -47,6 +47,7 @@
 			"status": "works"
 		},
 		{
+			"generate": "unique",
 			"signature": { "generics": ["A", "B"], "type": "A", "name": "always", "parameters": ["A", "a", "B", "ignore"] },
 			"status": "works"
 		},
@@ -55,14 +56,22 @@
 			"status": "works"
 		},
 		{
-			"signature": { "generics": ["A", "B"], "type": "List<B>", "name": "ap", "parameters": ["List<Function1<A, B>>", "fs", "List<A>", "as"] },
+			"generate": "unique",
+			"signature": { "generics": ["A", "B"], "type": "List<B>", "name": "ap", "parameters": ["List<? extends Function<? super A, ? extends B>>", "fs", "List<A>", "as"] },
 			"status": "incomplete",
 			"comment": "Only works on Lists."
 		},
 		{
+			"generate": "unique",
 			"signature": { "generics": ["L", "R", "T"], "type": "T", "name": "applyTuple", "parameters": ["BiFunction<L, R, T>", "f", "Tuple2<L,R>", "tuple"] },
 			"status": "incomplete",
-			"comment": "Only works on Tuples of size 2. Will be fixed."
+			"comment": "Only works on Tuples of size 2 and 3. Will be fixed."
+		},
+		{
+			"generate": "unique",
+			"signature": { "generics": ["T1", "T2", "T3", "R"], "type": "R", "name": "applyTuple", "parameters": ["Function3<? super T1, ? super T2, ? super T3, ? extends R>", "f", "Tuple3<T1, T2, T3>", "tuple"] },
+			"status": "incomplete",
+			"comment": "Only works on Tuples of size 2 and 3. Will be fixed."
 		},
 		{
 			"signature": { "generics": ["A"], "type": "Predicate<A>", "name": "complement", "parameters": ["Predicate<A>", "predicate"] },
@@ -81,6 +90,10 @@
 			"status": "works"
 		},
 		{
+			"signature": { "generics": ["A"], "type": "Integer", "name": "count", "parameters": ["Predicate<? super A>", "predicate", "List<A>", "list"] },
+			"status": "bonus"
+		},
+		{
 			"signature": { "generics": ["A"], "type": "A", "name": "defaultTo", "parameters": ["A", "a", "Option<A>", "optionA"] },
 			"status": "works"
 		},
@@ -96,7 +109,7 @@
 			"status": "works"
 		},
 		{
-			"signature": { "generics": ["A", "B"], "type": "List<B>", "name": "flatMap", "parameters": ["Function1<A, List<B>>", "f", "List<A>", "ma"] },
+			"signature": { "generics": ["A", "B"], "type": "List<B>", "name": "flatMap", "parameters": ["Function<A, List<B>>", "f", "List<A>", "ma"] },
 			"status": "incomplete",
 			"comment": "Only for lists?"
 		},
@@ -117,6 +130,10 @@
 		},
 		{
 			"signature": { "generics": ["A"], "type": "Option<A>", "name": "head", "parameters": ["List<A>", "list"] },
+			"status": "works"
+		},
+		{
+			"signature": { "generics": ["A"], "type":"A", "name":"identity", "parameters": ["A", "a"] },
 			"status": "works"
 		},
 		{
@@ -145,12 +162,12 @@
 			"comment": "Like join, except that it returns nothing when joining empty lists."
 		},
 		{
-			"signature": { "generics": ["S", "A"], "type": "Lens<S, A>", "name": "lens", "parameters": ["Function1<S, A>", "getter", "BiConsumer<S, A>", "setter"] },
-			"generate": "nothing",
+			"generate": "none",
+			"signature": { "generics": ["S", "A"], "type": "Lens<S, A>", "name": "lens", "parameters": ["Function<S, A>", "getter", "BiConsumer<S, A>", "setter"] },
 			"status": "works"
 		},
 		{
-			"signature": { "generics": ["A", "B"], "type": "List<B>", "name": "map", "parameters": ["Function1<A, B>", "f", "List<A>", "value"] },
+			"signature": { "generics": ["A", "B"], "type": "List<B>", "name": "map", "parameters": ["Function<A, B>", "f", "List<A>", "value"] },
 			"status": "works"
 		},
 		{
@@ -158,7 +175,16 @@
 			"status": "works"
 		},
 		{
-			"signature": { "generics": ["S extends Copyable<S>", "A"], "type": "S", "name": "over", "parameters": ["Lens<S, A>", "lens", "Function1<A, A>", "f", "S", "x"] },
+			"signature": { "generics": [], "type": "Boolean", "name": "not", "parameters": ["Boolean", "b"] },
+			"status": "works"
+		},
+		{
+			"generate": "none",
+			"signature": { "generics": ["T"], "type": "T", "name": "nullTo", "parameters": ["T", "fallback", "T", "nullable"] },
+			"status": "works"
+		},
+		{
+			"signature": { "generics": ["S extends Copyable<S>", "A"], "type": "S", "name": "over", "parameters": ["Lens<S, A>", "lens", "Function<A, A>", "f", "S", "x"] },
 			"status": "works"
 		},
 		{
@@ -185,10 +211,6 @@
 		},
 		{
 			"signature": { "generics": ["T", "U", "R"], "type": "List<R>", "name": "zipWith", "parameters": ["BiFunction<T, U, R>", "biFunction", "List<T>", "t", "List<U>", "u"] },
-			"status": "works"
-		},
-		{
-			"signature": { "generics": ["T"], "type": "T", "name": "nullTo", "parameters": ["T", "fallback", "T", "nullable"] },
 			"status": "works"
 		}
 	]

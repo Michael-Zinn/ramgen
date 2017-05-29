@@ -1,4 +1,4 @@
-package de.michaelzinn.ramgen;
+package de.michaelzinn.ramgen.java;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

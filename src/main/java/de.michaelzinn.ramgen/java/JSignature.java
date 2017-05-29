@@ -1,13 +1,8 @@
-package de.michaelzinn.ramgen;
+package de.michaelzinn.ramgen.java;
 
 import de.michaelzinn.ramgen.json.JsonSignature;
-import de.michaelzinn.ravr.Ravr;
-import io.vavr.Tuple;
-import io.vavr.Tuple2;
 import io.vavr.collection.List;
-import io.vavr.control.Option;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
 
 import static de.michaelzinn.ramgen.FunctionUtils.evens;

@@ -1,6 +1,10 @@
 package de.michaelzinn.ramgen;
 
+import de.michaelzinn.ramgen.java.JFunction;
+import de.michaelzinn.ramgen.java.JParameter;
+import de.michaelzinn.ramgen.java.JSignature;
 import de.michaelzinn.ramgen.json.*;
+import io.vavr.API;
 import io.vavr.Function1;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
@@ -57,7 +61,7 @@ public class Ramgen {
                         (keep ? param.getType() : "Placeholder") + " " + param.getName()
                 )),
                 join(", ")
-        ).apply(placeholders.zip(sig.parameters));
+        ).apply(placeholders.zip(sig.getParameters()));
     }
 
     static boolean not(Boolean b) {
@@ -76,20 +80,20 @@ public class Ramgen {
         // don't look at this!
         placeholders = placeholders.appendAll(Binary.repeat(false, 100));
 
-        return placeholders.zip(sig.parameters)
+        return placeholders.zip(sig.getParameters())
                 .filter(t -> !t._1)
                 .map(Tuple2::_2);
     }
 
     static List<JParameter> placeholdered(List<Boolean> placeholders, JSignature sig) {
-        return placeholders.zip(sig.parameters)
+        return placeholders.zip(sig.getParameters())
                 .map(applyTuple((use, param) ->
-                        new JParameter(use ? param.type : "Placeholder", (use ? "" : "_") + param.name)
+                        new JParameter(use ? param.getType() : "Placeholder", (use ? "" : "_") + param.getName())
                 ));
     }
 
     static List<JParameter> used(List<Boolean> placeholders, JSignature sig) {
-        return placeholders.zip(sig.parameters)
+        return placeholders.zip(sig.getParameters())
                 .filter(t -> t._1)
                 .map(Tuple2::_2);
     }
@@ -111,13 +115,13 @@ public class Ramgen {
         int suffix = countFalse(placeholders) + sig.getArity() - placeholders.size();
 
         return "public static " + generateGenerics.apply(sig) +
-                generateReturnType(unused(placeholders, sig), sig.type) +
-                sig.name + "(" + join(", ", map(Ramgen::generateParam, placeholdered(placeholders, sig))) + ") {\n" +
+                generateReturnType(unused(placeholders, sig), sig.getType()) +
+                sig.getName() + "(" + join(", ", map(Ramgen::generateParam, placeholdered(placeholders, sig))) + ") {\n" +
                 (all(not(), placeholders)
-                        ? "\treturn Ravr::" + sig.name + ";\n"
+                        ? "\treturn Ravr::" + sig.getName() + ";\n"
                         : "\treturn (" + join(", ", map(JParameter::getName, unused(placeholders, sig))) +
-                        ") -> " + sig.name + "(" + join(", ", map(JParameter::getName, sig.parameters)) + ");\n") +
-                "}\n\n";
+                        ") -> " + sig.getName() + "(" + join(", ", map(JParameter::getName, sig.getParameters())) + ");\n") +
+                "}";
     }
 
 
@@ -132,12 +136,12 @@ public class Ramgen {
 
         val strParams = doSeq(sig,
                 JSignature::getParameters,
-                map((JParameter p) -> p.type + " " + p.name),
+                map((JParameter p) -> p.getType() + " " + p.getName()),
                 join(", ")
         );
 
         return "public static" + strGenerics +
-                sig.name + "(" + strParams + ") {\n";
+                sig.getName() + "(" + strParams + ") {\n";
 
     }
 
@@ -145,7 +149,8 @@ public class Ramgen {
         return exponent == 0 ? 1 : x * intPow(x, exponent - 1);
     }
 
-    static List<String> partialize(JSignature sig) {
+    static List<String> partialize(JFunction jFunction) {
+        JSignature sig = jFunction.getSignature();
 
         List<Integer> paramCount = List.rangeClosed(0, sig.getArity());
 
@@ -159,7 +164,24 @@ public class Ramgen {
 
         List<List<Boolean>> wtf = binaries.init();
 
-        return wtf.map(it -> generatePartialTypes(it, sig)).reverse();
+        List<List<Boolean>> wtf2 = null;
+        switch (jFunction.getGenerate()) {
+            case ALL:
+                wtf2 = wtf;
+                break;
+            case NONE:
+                wtf2 = List.empty();
+                break;
+            case UNIQUE:
+                wtf2 = wtf.filter(any(x -> x));
+                break;
+            default:
+                wtf2 = wtf; // implies generate at the moment.
+        }
+
+
+        return wtf2.map(it -> generatePartialTypes(it, sig)).reverse();
+
 
         /*
         val generateCode = pipe(
@@ -197,7 +219,7 @@ public class Ramgen {
 
 
     static List<String> pipeParameterNames = pipeTypes.zipWith(pipeTypes.tail(), (a, b) -> a.toLowerCase() + b.toLowerCase());
-    static List<String> pipeParameterTypes = pipeTypes.zipWith(pipeTypes.tail(), (a, b) -> "Function1<" + a + ", " + b + ">");
+    static List<String> pipeParameterTypes = pipeTypes.zipWith(pipeTypes.tail(), (a, b) -> "Function<" + a + ", " + b + ">");
     static List<JParameter> pipeParameters = pipeParameterTypes.zipWith(pipeParameterNames, (t, n) -> new JParameter(t, n));
 
     static String generatePipeGenerics(int size) {
@@ -234,7 +256,7 @@ public class Ramgen {
 
     static String generatePipe(int size) {
         return "public static " + generatePipeGenerics(size) + "\n" +
-                "Function1<A, " + pipeTypes.get(size) + "> pipe(\n" +
+                "Function<A, " + pipeTypes.get(size) + "> pipe(\n" +
                 generatePipeParameters(size) + "\n" +
                 ") {\n" +
                 generatePipeImplementation(size) + "\n" +
@@ -244,7 +266,7 @@ public class Ramgen {
 
     static String generateHepgargar(int size) {
         return "public static " + generatePipeGenerics(size) + "\n" +
-                pipeTypes.get(size) + " t(\n" +
+                pipeTypes.get(size) + " doWith(\n" +
                 "A a,\n" +
                 generatePipeParameters(size) + "\n" +
                 ") {\n" +
@@ -256,7 +278,7 @@ public class Ramgen {
 
     static String generateCompose(int size) {
         return "public static " + generatePipeGenerics(size) + "\n" +
-                "Function1<A, " + pipeTypes.get(size) + "> compose(\n" +
+                "Function<A, " + pipeTypes.get(size) + "> compose(\n" +
                 generateComposeParameters(size) + "\n" +
                 ") {\n" +
                 generatePipeImplementation(size) + "\n" +
@@ -274,6 +296,22 @@ public class Ramgen {
 
     static List<String> generateComposes(int maxSize) {
         return List.rangeClosed(0, maxSize).map(Ramgen::generateCompose);
+    }
+
+    static String ruby(String string, int multiplier) {
+        return doSeq(
+                List.range(0, multiplier),
+                map(always(string)),
+                join("")
+        );
+    }
+
+    static String rpad(String string, String padding, int size) {
+        return string + ruby(padding, size - string.length());
+    }
+
+    static String separator(String text) {
+        return rpad("// " + text + " ", "/", 120);
     }
 
     static <A>
@@ -302,12 +340,10 @@ public class Ramgen {
 
         Map<String, JsonFunction> functionMap = data.getFunctions().toMap(fs -> fs.getSignature().getName(), x -> x);
 
-        /*
-        println(pipe(
+        String allNamesString = pipe(
                 (List<String> l) -> l.sortBy(toUpper()),
                 join("\n")
-        ).apply(allNames));
-        */
+        ).apply(allNames);
 
         Map<String, String> statusIdIcon = data.status.toMap(JsonStatus::getId, JsonStatus::getIcon);
 
@@ -319,7 +355,7 @@ public class Ramgen {
                                         pipe(functionMap::get, Option::get, function -> {
 
                                             val icon = statusIdIcon.get(function.getStatus()).get();
-                                            val name = function.signature.name;
+                                            val name = function.signature.getName();
                                             val comment = nullTo("", function.comment);
 
                                             return "| " + icon + " | " + name + " | " + comment + "|";
@@ -333,20 +369,45 @@ public class Ramgen {
                 );
 
 
-        List<String> generatedFunctions = data
-                .functions
-                .map(JsonFunction::getSignature)
-                .map(JSignature::fromJsonSignature)
-                .flatMap(Ramgen::partialize); // x -> generatePartialTypes(L(false, true), x))
+        List<String> generatedFunctions = doSeq(data,
+                JsonData::getFunctions,
+                map(pipe(
+                        tap(f -> println(f.getSignature().getName())),
+                        JFunction::of
+                )),
+                flatMap(Ramgen::partialize)
+        );
 
-        println("Generated " + generatedFunctions.size() + " functions.");
+
+        //.flatMap(Ramgen::partialize); // x -> generatePartialTypes(L(false, true), x))
+
+        /*
+        p;rintln("Generated " + generatedFunctions.size() + " functions.");
         println();
         println(markdownTable);
+        //*/
 
-        Boolean b = ifElse(not(), Function.identity(), always(false), true);
 
-        //generatedFunctions.forEach(System.out::println);
+        println();
+        println(separator("COMPOSE"));
 
-//        println(join("\n\n", generateHepgargars(10)));
+        println(join("\n", generateComposes(10)));
+        println();
+        println();
+        println(separator("PIPE"));
+        println();
+        println(join("\n", generatePipes(10)));
+        println();
+        println();
+        println(separator("DO_WITH"));
+        println();
+        println(join("\n\n", generateHepgargars(10)));
+        println();
+        println();
+        println(separator("PARTIAL APPLICATIONS"));
+        println();
+
+        println(join("\n\n", generatedFunctions));
+
     }
 }
