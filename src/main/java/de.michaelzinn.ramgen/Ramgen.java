@@ -17,7 +17,7 @@ import lombok.val;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static de.michaelzinn.ramgen.ThreadingMacro.doSeq;
+import static de.michaelzinn.ravr.Placeholder.__;
 import static de.michaelzinn.ravr.Ravr.*;
 import static io.vavr.API.*;
 
@@ -29,13 +29,7 @@ import static io.vavr.API.*;
  */
 public class Ramgen {
 
-    // shortcut
-    static <A> List<A> L(A... list) {
-        return List.of(list);
-    }
-
-
-    static Function1<JSignature, String> generateGenerics = pipe(
+    static Function<JSignature, String> generateGenerics = pipe(
             JSignature::getGenerics,
             joinOption(", "),
             option -> option.map(g -> "<" + g + ">\n"),
@@ -56,24 +50,13 @@ public class Ramgen {
     */
 
     static String generatePartialParameters(List<Boolean> placeholders, JSignature sig) {
-        return pipe(
-                map(applyTuple((Boolean keep, JParameter param) ->
+        return doWith(placeholders
+                .zipWith(sig.getParameters()
+                ,(Boolean keep, JParameter param) ->
                         (keep ? param.getType() : "Placeholder") + " " + param.getName()
-                )),
-                join(", ")
-        ).apply(placeholders.zip(sig.getParameters()));
-    }
-
-    static boolean not(Boolean b) {
-        return !b;
-    }
-
-    static Predicate<Boolean> not() {
-        return b -> !b;
-    }
-
-    static int countFalse(List<Boolean> booleans) {
-        return booleans.count(Ramgen::not);
+                )
+                ,join(", ")
+        );
     }
 
     static List<JParameter> unused(List<Boolean> placeholders, JSignature sig) {
@@ -112,7 +95,7 @@ public class Ramgen {
 
     static String generatePartialTypes(List<Boolean> placeholders, JSignature sig) {
 
-        int suffix = countFalse(placeholders) + sig.getArity() - placeholders.size();
+        int suffix = count(not(), placeholders) + sig.getArity() - placeholders.size();
 
         return "public static " + generateGenerics.apply(sig) +
                 generateReturnType(unused(placeholders, sig), sig.getType()) +
@@ -127,14 +110,14 @@ public class Ramgen {
 
     static String toCode(JSignature sig) {
 
-        val strGenerics = doSeq(sig,
+        val strGenerics = doWith(sig,
                 JSignature::getGenerics,
                 joinOption(", "),
                 option -> option.map((String g) -> " <" + g + ">\n"),
                 defaultTo("")
         );
 
-        val strParams = doSeq(sig,
+        val strParams = doWith(sig,
                 JSignature::getParameters,
                 map((JParameter p) -> p.getType() + " " + p.getName()),
                 join(", ")
@@ -299,8 +282,7 @@ public class Ramgen {
     }
 
     static String ruby(String string, int multiplier) {
-        return doSeq(
-                List.range(0, multiplier),
+        return doWith(List.range(0, multiplier),
                 map(always(string)),
                 join("")
         );
@@ -314,9 +296,28 @@ public class Ramgen {
         return rpad("// " + text + " ", "/", 120);
     }
 
-    static <A>
-    Function1<List<A>, List<A>> concat(List<A> one) {
-        return two -> one.appendAll(two);
+    // TODO to ravr
+    static <T, C extends Comparable<C>> List<T> sortBy(Function<T, C> by, List<T> list) {
+        return list.sortBy(by);//a -> by.apply(a));
+    }
+
+    // TODO to ravr
+    static <T, C extends Comparable<C>>
+    Function<List<T>, List<T>> sortBy(Function<T, C> by) {
+        return list -> sortBy(by, list);
+    }
+
+    // TODO ravr
+    static <T>
+    Function<List<T>, List<T>> without(List<T> remove) {
+        return list -> list.removeAll(remove);
+    }
+
+    // TODO ravr
+    static <T>
+    Function<List<T>, List<T>> uniq() {
+        // TODO this destroys the order?
+        return list -> list.toSet().toList();
     }
 
     public static void main(String[] args) {
@@ -325,18 +326,19 @@ public class Ramgen {
 
         List<JsonRamdaDoc> ramdaDoc = ReadJson.getRamdaDoc();
 
-        List<String> allNames = pipe(
+        List<String> ramdaNames = ramdaDoc.map(JsonRamdaDoc::getName);
+
+        List<String> allNames = doWith(data,
                 JsonData::getFunctions,
                 map(pipe(
                         JsonFunction::getSignature,
                         JsonSignature::getName
                 )),
-                concat(ramdaDoc.map(JsonRamdaDoc::getName)),
-                List::toSet,
-                s -> s.removeAll(data.hide),
-                Set::toList,
-                l -> l.sortBy(toUpper())
-        ).apply(data);
+                concat(__, ramdaNames),
+                uniq(),
+                without(data.getHide()),
+                sortBy(toUpper())
+        );
 
         Map<String, JsonFunction> functionMap = data.getFunctions().toMap(fs -> fs.getSignature().getName(), x -> x);
 
@@ -349,7 +351,7 @@ public class Ramgen {
 
         String markdownTable = "| Status | Function | Note |\n" +
                 "|:----:|:--------|:-----|\n" +
-                doSeq(allNames,
+                doWith(allNames,
                         map(
                                 ifElse(functionMap::containsKey,
                                         pipe(functionMap::get, Option::get, function -> {
@@ -369,7 +371,7 @@ public class Ramgen {
                 );
 
 
-        List<String> generatedFunctions = doSeq(data,
+        List<String> generatedFunctions = doWith(data,
                 JsonData::getFunctions,
                 map(pipe(
                         tap(f -> println(f.getSignature().getName())),
