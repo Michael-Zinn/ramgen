@@ -4,16 +4,14 @@ import de.michaelzinn.ramgen.java.JFunction;
 import de.michaelzinn.ramgen.java.JParameter;
 import de.michaelzinn.ramgen.java.JSignature;
 import de.michaelzinn.ramgen.json.*;
-import io.vavr.API;
-import io.vavr.Function1;
-import io.vavr.Tuple;
-import io.vavr.Tuple2;
+import io.vavr.*;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.collection.Set;
 import io.vavr.control.Option;
 import lombok.val;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -28,6 +26,10 @@ import static io.vavr.API.*;
  * Created by michael on 26.05.17.
  */
 public class Ramgen {
+
+    static List<String> academicGenerics = List.of("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""));
+
+    static List<String> enterpriseGenerics = List.of("TUVWXYZ".split(""));
 
     static Function<JSignature, String> generateGenerics = pipe(
             JSignature::getGenerics,
@@ -301,6 +303,27 @@ public class Ramgen {
         return list.sortBy(by);//a -> by.apply(a));
     }
 
+    abstract class ParameterNameGenerator implements Function4<Integer, Integer, String, String, String> {
+
+        abstract public String generateParam(Integer paramCount, Integer paramIndex, String paramType, String paramName);
+
+        @Override
+        public String apply(Integer integer, Integer integer2, String s, String s2) {
+            return generateParam(integer, integer2, s, s2);
+        }
+
+    }
+
+    static List<String> generateTypeAlignedSequenceFunction(
+            List<String> generics,
+            String name,
+            List<String> initialParameters,
+            ParameterNameGenerator parameterNameGenerator,
+            Function5<Integer, Integer, String, String, String, String> recursionFunction,
+            Function5<Integer, Integer, String, String, String, String> recursionConsumer,
+    ) {
+
+    }
     // TODO to ravr
     static <T, C extends Comparable<C>>
     Function<List<T>, List<T>> sortBy(Function<T, C> by) {
