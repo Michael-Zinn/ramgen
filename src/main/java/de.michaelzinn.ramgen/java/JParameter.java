@@ -8,4 +8,11 @@ import lombok.Getter;
  */
 @Getter
 @AllArgsConstructor
-public class JParameter { String type, name; }
+public class JParameter {
+    String type, name;
+
+    @Override
+    public String toString() {
+        return type + ", " + name;
+    }
+}

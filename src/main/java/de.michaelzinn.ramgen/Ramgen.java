@@ -1,14 +1,17 @@
 package de.michaelzinn.ramgen;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import de.michaelzinn.ramgen.java.JFunction;
 import de.michaelzinn.ramgen.java.JParameter;
 import de.michaelzinn.ramgen.java.JSignature;
 import de.michaelzinn.ramgen.json.*;
+import de.michaelzinn.ramgen.macro.Macro;
 import io.vavr.*;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.collection.Set;
 import io.vavr.control.Option;
+import lombok.Data;
 import lombok.val;
 
 import java.util.function.BiFunction;
@@ -29,7 +32,7 @@ public class Ramgen {
 
     static List<String> academicGenerics = List.of("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""));
 
-    static List<String> enterpriseGenerics = List.of("TUVWXYZ".split(""));
+    static List<String> enterpriseGenerics = List.of("TUVWXYZABCDEFGHIJKLMNOPQRS".split(""));
 
     static Function<JSignature, String> generateGenerics = pipe(
             JSignature::getGenerics,
@@ -314,20 +317,11 @@ public class Ramgen {
 
     }
 
-    /*
 
-    static List<String> generateTypeAlignedSequenceFunction(
-            List<String> generics,
-            String name,
-            List<String> initialParameters,
-            ParameterNameGenerator parameterNameGenerator,
-            Function5<Integer, Integer, String, String, String, String> recursionFunction,
-            Function5<Integer, Integer, String, String, String, String> recursionConsumer,
-    ) {
+
+    abstract class FunctionOption<A, B> implements Function<A, B> {
 
     }
-    */
-
 
     // TODO to ravr
     static <T, C extends Comparable<C>>
@@ -413,6 +407,16 @@ public class Ramgen {
         );
 
 
+        /* null4j macros
+        println(join("\n\n", orDefault.expand(10)));
+        println();
+        println();
+        println();
+        println();
+        println(join("\n\n", let.expand(10)));
+        */
+
+
         //println(partialize(javaFunctionMap.get("concatOptions").get()));
 
 
@@ -425,8 +429,7 @@ public class Ramgen {
         //*/
 
 
-        //*
-        println();
+        /*
         println(separator("COMPOSE"));
 
         println(join("\n", generateComposes(10)));
