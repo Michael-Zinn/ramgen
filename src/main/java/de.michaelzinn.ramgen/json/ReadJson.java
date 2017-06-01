@@ -20,13 +20,15 @@ public class ReadJson {
         return mapper;
     }
 
+    private static String path = "/Users/michaelzinn/projects/ramgen/";
+
     @SneakyThrows
     static <T> T slurp(String file, Class<T> clazz) {
-        return mapper().readValue(new File("/home/michael/IdeaProjects/ramgen/"+file+".json"), clazz);
+        return mapper().readValue(new File(path + file+".json"), clazz);
     }
     @SneakyThrows
     static <T> T slurp(String file, TypeReference<T> clazz) {
-        return mapper().readValue(new File("/home/michael/IdeaProjects/ramgen/"+file+".json"), clazz);
+        return mapper().readValue(new File(path + file+".json"), clazz);
     }
 
     public static JsonData getData() {

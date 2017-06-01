@@ -53,11 +53,11 @@ public class Ramgen {
 
     static String generatePartialParameters(List<Boolean> placeholders, JSignature sig) {
         return doWith(placeholders
-                .zipWith(sig.getParameters()
-                ,(Boolean keep, JParameter param) ->
-                        (keep ? param.getType() : "Placeholder") + " " + param.getName()
-                )
-                ,join(", ")
+                        .zipWith(sig.getParameters()
+                                , (Boolean keep, JParameter param) ->
+                                        (keep ? param.getType() : "Placeholder") + " " + param.getName()
+                        )
+                , join(", ")
         );
     }
 
@@ -314,6 +314,8 @@ public class Ramgen {
 
     }
 
+    /*
+
     static List<String> generateTypeAlignedSequenceFunction(
             List<String> generics,
             String name,
@@ -324,6 +326,9 @@ public class Ramgen {
     ) {
 
     }
+    */
+
+
     // TODO to ravr
     static <T, C extends Comparable<C>>
     Function<List<T>, List<T>> sortBy(Function<T, C> by) {
@@ -393,6 +398,10 @@ public class Ramgen {
                         join("\n")
                 );
 
+        List<JFunction> functions = data.getFunctions().map(JFunction::of);
+
+        Map<String, JFunction> javaFunctionMap = functions.toMap(jsonFunction -> Tuple.of(jsonFunction.getSignature().getName(), jsonFunction));
+
 
         List<String> generatedFunctions = doWith(data,
                 JsonData::getFunctions,
@@ -404,6 +413,9 @@ public class Ramgen {
         );
 
 
+        //println(partialize(javaFunctionMap.get("concatOptions").get()));
+
+
         //.flatMap(Ramgen::partialize); // x -> generatePartialTypes(L(false, true), x))
 
         /*
@@ -413,6 +425,7 @@ public class Ramgen {
         //*/
 
 
+        //*
         println();
         println(separator("COMPOSE"));
 
@@ -433,6 +446,7 @@ public class Ramgen {
         println();
 
         println(join("\n\n", generatedFunctions));
+        //*/
 
     }
 }
