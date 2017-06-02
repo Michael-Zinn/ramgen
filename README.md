@@ -1,5 +1,7 @@
 ## Ramgen
 
+Explorative Java code.
+
 Java code that uses Ravr to generate Java code that's used by Ravr.
 
 This is currently an unorganized hack that looks like it might turn into a macro system for Java later. It's not recommended to look at the code just yet.
