@@ -28,9 +28,9 @@ public class Macro {
     SubMacro parameterMacro;
     List<String> trailingParameters;
 
-    String bodyPre;
+    SubMacro<Tuple2<String, String>> bodyOuter;
+    String bodyCore;
     SubMacro<Tuple2<String, String>> bodyMacro;
-    String bodyPost;
 
     public String expandOne(int macroParameterCount) {
 
@@ -49,22 +49,25 @@ public class Macro {
                         Ravr::concatOptions,
                         join(",\n\t\t")
                 ) + "\n\t) {\n" +
-                bodyPre +
-                expandBody(macroParameterCount -1, macroParameterCount -1) +
-                bodyPost +
+                bodyOuter.expand(this, macroParameterCount, macroParameterCount)._1() +
+                expandBody(macroParameterCount -1, macroParameterCount -1, bodyCore) +
+                bodyOuter.expand(this, macroParameterCount, macroParameterCount)._2() +
                 "\t}";
     }
 
-    private String expandBody(int i, int max) {
+    private String expandBody(int i, int max, String core) {
         if(i == 0) {
-            return bodyMacro.expand(this, 0, max).apply((a, b) -> a + b);
+            return bodyMacro.expand(this, 0, max).apply((a, b) -> a + core + b);
         } else {
-            return bodyMacro.expand(this, i, max).apply((a, b) -> a + expandBody(i - 1, max) + b);
+            return bodyMacro.expand(this, i, max).apply((a, b) -> a + expandBody(i - 1, max, core) + b);
         }
     }
 
-    public List<String> expand(int maxMacroParameterCount) {
-        return List.rangeClosed(1, maxMacroParameterCount).map(this::expandOne);
+    public String expand(int maxMacroParameterCount) {
+        return doWith(List.rangeClosed(1, maxMacroParameterCount),
+                map(this::expandOne),
+                join("\n\n")
+        );
     }
 
     @FunctionalInterface

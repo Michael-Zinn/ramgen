@@ -342,6 +342,66 @@ public class Ramgen {
         return list -> list.toSet().toList();
     }
 
+    static Macro DO_WITH = Macro.of(
+            academicGenerics,
+            (macro, i, max) -> macro.getGenericNames().get(i),
+            "doWith",
+            List("A value"),
+            (macro, i, max) -> {
+                String in = macro.getGenericNames().get(i);
+                String out = macro.getGenericNames().get(i + 1);
+                return "Function<? super " + in + ", " + out + "> f_" + in + "_" + out;
+            },
+            List(),
+            (macro, i, max) -> Tuple.of("\t\treturn ", ";\n"),
+            "value",
+            (macro, i, max) -> {
+                String in = macro.getGenericNames().get(i);
+                String out = macro.getGenericNames().get(i + 1);
+                return Tuple.of("f_"+in+"_"+out+".apply(",")");
+            }
+    );
+
+    static Macro PIPE = Macro.of(
+            academicGenerics,
+            (macro, i, max) -> "Function<? super A, "+macro.getGenericNames().get(i)+">",
+            "pipe",
+            List(),
+            (macro, i, max) -> {
+                String in = macro.getGenericNames().get(i);
+                String out = macro.getGenericNames().get(i + 1);
+                return "Function<? super " + in + ", " + out + "> f_" + in + "_" + out;
+            },
+            List(),
+            (macro, i, max) -> Tuple.of("\t\treturn value -> ", ";\n"),
+            "value",
+            (macro, i, max) -> {
+                String in = macro.getGenericNames().get(i);
+                String out = macro.getGenericNames().get(i + 1);
+                return Tuple.of("f_"+in+"_"+out+".apply(",")");
+            }
+    );
+
+    static Macro COMPOSE = Macro.of(
+            academicGenerics,
+            (macro, i, max) -> "Function<? super A, "+macro.getGenericNames().get(i)+">",
+            "compose",
+            List(),
+            (macro, i, max) -> {
+                String in = macro.getGenericNames().get(max - i - 1);
+                String out = macro.getGenericNames().get(max - i);
+                return "Function<? super " + in + ", " + out + "> f_" + in + "_" + out;
+            },
+            List(),
+            (macro, i, max) -> Tuple.of("\t\treturn value -> ", ";\n"),
+            "value",
+            (macro, i, max) -> {
+                String in = macro.getGenericNames().get(i);
+                String out = macro.getGenericNames().get(i + 1);
+                return Tuple.of("f_"+in+"_"+out+".apply(",")");
+            }
+    );
+
     public static void main(String[] args) {
 
         JsonData data = ReadJson.getData();
@@ -407,14 +467,19 @@ public class Ramgen {
         );
 
 
-        /* null4j macros
-        println(join("\n\n", orDefault.expand(10)));
+
+        // macros
+        println(COMPOSE.expand(10));
         println();
         println();
         println();
         println();
-        println(join("\n\n", let.expand(10)));
-        */
+        println(PIPE.expand(10));
+        println();
+        println();
+        println();
+        println();
+        println(DO_WITH.expand(10));
 
 
         //println(partialize(javaFunctionMap.get("concatOptions").get()));
