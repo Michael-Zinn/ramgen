@@ -25,8 +25,8 @@ public class Macro {
     SubMacro<String> typeMacro;
     String name;
     List<String> initialParameters;
-    SubMacro parameterMacro;
-    List<String> trailingParameters;
+    SubMacro<String> parameterMacro;
+    SubMacro<List<String>> trailingParametersMacro;
 
     SubMacro<Tuple2<String, String>> bodyOuter;
     String bodyCore;
@@ -44,7 +44,7 @@ public class Macro {
                                         map(i -> parameterMacro.expand(this, i, macroParameterCount)),
                                         joinOption(",\n\t\t")
                                 ),
-                                joinOption(", ", trailingParameters)
+                                joinOption(", ", trailingParametersMacro.expand(this, macroParameterCount, macroParameterCount))
                         ),
                         Ravr::concatOptions,
                         join(",\n\t\t")
@@ -78,5 +78,24 @@ public class Macro {
                 int maxIteration
         );
     }
+
+    /*
+
+    @Getter
+    @AllArgsConstructor(staticName = "of")
+    public class Expansion {
+        private String typeMacro;
+        String name;
+        List<String> initialParameters;
+        List<String> macroParameters;
+        List<String> trailingParameters;
+
+        String initialBody;
+        String initialMacroBody;
+        String coreBody;
+        String trailingMacroBody;
+        String trailingBody;
+    }
+    */
 
 }

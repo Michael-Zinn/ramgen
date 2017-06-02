@@ -1,26 +1,24 @@
 package de.michaelzinn.ramgen;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import de.michaelzinn.ramgen.java.JFunction;
 import de.michaelzinn.ramgen.java.JParameter;
 import de.michaelzinn.ramgen.java.JSignature;
 import de.michaelzinn.ramgen.json.*;
 import de.michaelzinn.ramgen.macro.Macro;
-import io.vavr.*;
+import io.vavr.Function4;
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
-import io.vavr.collection.Set;
 import io.vavr.control.Option;
-import lombok.Data;
 import lombok.val;
 
-import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 import static de.michaelzinn.ravr.Placeholder.__;
 import static de.michaelzinn.ravr.Ravr.*;
-import static io.vavr.API.*;
+import static io.vavr.API.List;
+import static io.vavr.API.println;
 
 
 /**
@@ -137,7 +135,7 @@ public class Ramgen {
         return exponent == 0 ? 1 : x * intPow(x, exponent - 1);
     }
 
-    static List<String> partialize(JFunction jFunction) {
+    static String partialize(JFunction jFunction) {
         JSignature sig = jFunction.getSignature();
 
         List<Integer> paramCount = List.rangeClosed(0, sig.getArity());
@@ -168,123 +166,13 @@ public class Ramgen {
         }
 
 
-        return wtf2.map(it -> generatePartialTypes(it, sig)).reverse();
-
-
-        /*
-        val generateCode = pipe(
-                (Integer x) -> Binary.toLittleEndianBooleans(sig.getArity(), x),
-                y -> generatePartialTypes(y, sig)
+        return join("\n\n",
+                wtf2.map(it -> generatePartialTypes(it, sig)).reverse()
         );
 
-        return join("\n\n", List.range(0, sig.getArity() + 1)
-                .flatMap(pcount -> List.range(0, intPow(2, pcount) - 1))
-                .map(generateCode)
-        );
-        */
 
     }
 
-    /*
-       public static <A, B, C, D, E, F, G, H>
-    Function1<A, H> pipe(
-            Function1<A, B> ab,
-            Function1<B, C> bc,
-            Function1<C, D> cd,
-            Function1<D, E> de,
-            Function1<E, F> ef,
-            Function1<F, G> fg,
-            Function1<G, H> gh
-    ) {
-        return a -> gh.apply(fg.apply(ef.apply(de.apply(cd.apply(bc.apply(ab.apply(a)))))));
-    }
-     */
-
-
-    // PIPE ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    static List<String> pipeTypes = List.of("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""));
-
-
-    static List<String> pipeParameterNames = pipeTypes.zipWith(pipeTypes.tail(), (a, b) -> a.toLowerCase() + b.toLowerCase());
-    static List<String> pipeParameterTypes = pipeTypes.zipWith(pipeTypes.tail(), (a, b) -> "Function<" + a + ", " + b + ">");
-    static List<JParameter> pipeParameters = pipeParameterTypes.zipWith(pipeParameterNames, (t, n) -> new JParameter(t, n));
-
-    static String generatePipeGenerics(int size) {
-        return "<" + join(", ", pipeTypes.take(size + 1)) + ">";
-    }
-
-
-    static List<String> generatePipeParametersRaw(int size) {
-        return pipeParameters.take(size).map(p -> p.getType() + " " + p.getName());
-    }
-
-    static String generatePipeParameters(int size) {
-        return join(",\n", generatePipeParametersRaw(size));
-    }
-
-    static String generateComposeParameters(int size) {
-        return join(",\n", generatePipeParametersRaw(size).reverse());
-    }
-
-    static String generatePipeCore(int size) {
-        return Match(size).of(
-                Case($(0), "a"),
-                Case($(), x -> pipeParameterNames.get(x - 1) + ".apply(" + generatePipeCore(x - 1) + ")")
-        );
-    }
-
-    static String generateHepgargarImplementation(int size) {
-        return "return " + generatePipeCore(size) + ";";
-    }
-
-    static String generatePipeImplementation(int size) {
-        return "return a -> " + generatePipeCore(size) + ";";
-    }
-
-    static String generatePipe(int size) {
-        return "public static " + generatePipeGenerics(size) + "\n" +
-                "Function<A, " + pipeTypes.get(size) + "> pipe(\n" +
-                generatePipeParameters(size) + "\n" +
-                ") {\n" +
-                generatePipeImplementation(size) + "\n" +
-                "}\n";
-
-    }
-
-    static String generateHepgargar(int size) {
-        return "public static " + generatePipeGenerics(size) + "\n" +
-                pipeTypes.get(size) + " doWith(\n" +
-                "A a,\n" +
-                generatePipeParameters(size) + "\n" +
-                ") {\n" +
-                generateHepgargarImplementation(size) + "\n" +
-                "}\n";
-
-    }
-
-
-    static String generateCompose(int size) {
-        return "public static " + generatePipeGenerics(size) + "\n" +
-                "Function<A, " + pipeTypes.get(size) + "> compose(\n" +
-                generateComposeParameters(size) + "\n" +
-                ") {\n" +
-                generatePipeImplementation(size) + "\n" +
-                "}\n";
-
-    }
-
-    static List<String> generatePipes(int maxSize) {
-        return List.rangeClosed(0, maxSize).map(Ramgen::generatePipe);
-    }
-
-    static List<String> generateHepgargars(int maxSize) {
-        return List.rangeClosed(0, maxSize).map(Ramgen::generateHepgargar);
-    }
-
-    static List<String> generateComposes(int maxSize) {
-        return List.rangeClosed(0, maxSize).map(Ramgen::generateCompose);
-    }
 
     static String ruby(String string, int multiplier) {
         return doWith(List.range(0, multiplier),
@@ -318,21 +206,10 @@ public class Ramgen {
     }
 
 
-
-    abstract class FunctionOption<A, B> implements Function<A, B> {
-
-    }
-
     // TODO to ravr
     static <T, C extends Comparable<C>>
     Function<List<T>, List<T>> sortBy(Function<T, C> by) {
         return list -> sortBy(by, list);
-    }
-
-    // TODO ravr
-    static <T>
-    Function<List<T>, List<T>> without(List<T> remove) {
-        return list -> list.removeAll(remove);
     }
 
     // TODO ravr
@@ -352,19 +229,42 @@ public class Ramgen {
                 String out = macro.getGenericNames().get(i + 1);
                 return "Function<? super " + in + ", " + out + "> f_" + in + "_" + out;
             },
-            List(),
+            (macro, i, max) -> List(),
             (macro, i, max) -> Tuple.of("\t\treturn ", ";\n"),
             "value",
             (macro, i, max) -> {
                 String in = macro.getGenericNames().get(i);
                 String out = macro.getGenericNames().get(i + 1);
-                return Tuple.of("f_"+in+"_"+out+".apply(",")");
+                return Tuple.of("f_" + in + "_" + out + ".apply(", ")");
             }
     );
 
-    static Macro PIPE = Macro.of(
+    static Macro _predicatePipe = Macro.of(
             academicGenerics,
-            (macro, i, max) -> "Function<? super A, "+macro.getGenericNames().get(i)+">",
+            (macro, i, max) -> "Predicate<A>",
+            "pipe_Predicate",
+            List(),
+            (macro, i, max) -> {
+                String in = macro.getGenericNames().get(i);
+                String out = macro.getGenericNames().get(i + 1);
+                return "Function<? super " + in + ", " + out + "> f_" + in + "_" + out;
+            },
+            (macro, i, max) -> {
+                String in = macro.getGenericNames().get(i);
+                return List("Predicate<" + in + "> predicate");
+            },
+            (macro, i, max) -> Tuple.of("\t\treturn value -> predicate.test(", ");\n"),
+            "value",
+            (macro, i, max) -> {
+                String in = macro.getGenericNames().get(i);
+                String out = macro.getGenericNames().get(i + 1);
+                return Tuple.of("f_" + in + "_" + out + ".apply(", ")");
+            }
+    );
+
+    static Macro _pipe = Macro.of(
+            academicGenerics,
+            (macro, i, max) -> "Function<A, " + macro.getGenericNames().get(i) + ">",
             "pipe",
             List(),
             (macro, i, max) -> {
@@ -372,19 +272,19 @@ public class Ramgen {
                 String out = macro.getGenericNames().get(i + 1);
                 return "Function<? super " + in + ", " + out + "> f_" + in + "_" + out;
             },
-            List(),
+            (macro, i, max) -> List(),
             (macro, i, max) -> Tuple.of("\t\treturn value -> ", ";\n"),
             "value",
             (macro, i, max) -> {
                 String in = macro.getGenericNames().get(i);
                 String out = macro.getGenericNames().get(i + 1);
-                return Tuple.of("f_"+in+"_"+out+".apply(",")");
+                return Tuple.of("f_" + in + "_" + out + ".apply(", ")");
             }
     );
 
     static Macro COMPOSE = Macro.of(
             academicGenerics,
-            (macro, i, max) -> "Function<? super A, "+macro.getGenericNames().get(i)+">",
+            (macro, i, max) -> "Function<A, " + macro.getGenericNames().get(i) + ">",
             "compose",
             List(),
             (macro, i, max) -> {
@@ -392,15 +292,43 @@ public class Ramgen {
                 String out = macro.getGenericNames().get(max - i);
                 return "Function<? super " + in + ", " + out + "> f_" + in + "_" + out;
             },
-            List(),
+            (macro, i, max) -> List(),
             (macro, i, max) -> Tuple.of("\t\treturn value -> ", ";\n"),
             "value",
             (macro, i, max) -> {
                 String in = macro.getGenericNames().get(i);
                 String out = macro.getGenericNames().get(i + 1);
-                return Tuple.of("f_"+in+"_"+out+".apply(",")");
+                return Tuple.of("f_" + in + "_" + out + ".apply(", ")");
             }
     );
+
+    static Macro _pipeK(String m) {
+        return Macro.of(
+                academicGenerics,
+                (macro, i, max) -> "Function<A, " + m + "<" + macro.getGenericNames().get(i) + ">>",
+                "pipeK_" + m,
+                List(),
+                (macro, i, max) -> {
+                    String in = macro.getGenericNames().get(i);
+                    String out = macro.getGenericNames().get(i + 1);
+                    return "Function<? super " + in + ", " + m + "<" + out + ">> f_" + in + "_" + out;
+                },
+                (macro, i, max) -> List(),
+                (macro, i, max) -> Tuple.of("\t\treturn value -> ", ";\n"),
+                "value",
+                (macro, i, max) -> {
+                    String in = macro.getGenericNames().get(i);
+                    String out = macro.getGenericNames().get(i + 1);
+
+                    String f = "f_" + in + "_" + out;
+
+                    return i == 0 ?
+                            Tuple.of(f + ".apply(", ")") :
+                            Tuple.of("", ".flatMap(" + f + ")");
+                }
+        );
+    }
+
 
     public static void main(String[] args) {
 
@@ -457,30 +385,41 @@ public class Ramgen {
         Map<String, JFunction> javaFunctionMap = functions.toMap(jsonFunction -> Tuple.of(jsonFunction.getSignature().getName(), jsonFunction));
 
 
-        List<String> generatedFunctions = doWith(data,
+        String generatedFunctions = doWith(data,
                 JsonData::getFunctions,
                 map(pipe(
                         tap(f -> println(f.getSignature().getName())),
                         JFunction::of
                 )),
-                flatMap(Ramgen::partialize)
+                map(Ramgen::partialize),
+                join("\n\n")
         );
 
 
-
         // macros
-        println(COMPOSE.expand(10));
-        println();
-        println();
-        println();
-        println();
-        println(PIPE.expand(10));
-        println();
-        println();
-        println();
-        println();
-        println(DO_WITH.expand(10));
+        String macros = doWith(List.of(
+                COMPOSE,
+                _pipe,
+                _predicatePipe,
+                DO_WITH
+                ),
+                concat(__, map(Ramgen::_pipeK, List.of(
+                        "List",
+                        "Option"
+                ))),
+                map(macro -> macro.expand(10)),
+                join("\n\n\n\n")
+        );
 
+        String generatedCode = join("\n\n\n", List(
+                separator("PARTIAL APPLICATIONS"),
+                generatedFunctions,
+                separator("TYPE ALIGNED SEQUENCE FUNCTIONS"),
+                macros
+        ));
+
+        //println(generatedCode);
+        println(markdownTable);
 
         //println(partialize(javaFunctionMap.get("concatOptions").get()));
 
@@ -500,7 +439,7 @@ public class Ramgen {
         println(join("\n", generateComposes(10)));
         println();
         println();
-        println(separator("PIPE"));
+        println(separator("_pipe"));
         println();
         println(join("\n", generatePipes(10)));
         println();

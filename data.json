@@ -100,6 +100,10 @@
 			"status": "bonus"
 		},
 		{
+			"signature": { "generics": [], "type": "Integer", "name": "dec", "parameters": ["Integer", "x"] },
+			"status": "works"
+		},
+		{
 			"signature": { "generics": ["A"], "type": "A", "name": "defaultTo", "parameters": ["A", "a", "Option<A>", "optionA"] },
 			"status": "works"
 		},
@@ -149,6 +153,10 @@
 			"status": "works"
 		},
 		{
+			"signature": { "generics": [], "type": "Integer", "name": "inc", "parameters": ["Integer", "x"] },
+			"status": "works"
+		},
+		{
 			"signature": { "generics": ["A"], "type": "Boolean", "name": "isNone", "parameters": ["Option<A>", "any"] },
 			"status": "works",
 			"comment": "Replacement for isNil, returns true for Option.none()."
@@ -174,6 +182,18 @@
 		},
 		{
 			"signature": { "generics": ["A", "B"], "type": "List<B>", "name": "map", "parameters": ["Function<A, B>", "f", "List<A>", "value"] },
+			"status": "works"
+		},
+		{
+			"signature": { "generics": ["A", "B"], "type": "Option<B>", "name": "map_Option", "parameters": ["Function<A, B>", "f", "Option<A>", "value"] },
+			"status": "works"
+		},
+		{
+			"signature": { "generics": ["L", "R", "Z"], "type": "Either<L, Z>", "name": "map_Either", "parameters": ["Function<R, Z>", "f", "Either<L, R>", "value"] },
+			"status": "works"
+		},
+		{
+			"signature": { "generics": ["L", "R", "Z"], "type": "Either<Z, R>", "name": "map_Either_left", "parameters": ["Function<L, Z>", "f", "Either<L, R>", "value"] },
 			"status": "works"
 		},
 		{
