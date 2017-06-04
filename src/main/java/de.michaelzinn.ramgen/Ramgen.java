@@ -5,9 +5,7 @@ import de.michaelzinn.ramgen.java.JParameter;
 import de.michaelzinn.ramgen.java.JSignature;
 import de.michaelzinn.ramgen.json.*;
 import de.michaelzinn.ramgen.macro.Macro;
-import io.vavr.Function4;
-import io.vavr.Tuple;
-import io.vavr.Tuple2;
+import io.vavr.*;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.control.Option;
@@ -219,6 +217,87 @@ public class Ramgen {
         return list -> list.toSet().toList();
     }
 
+    static List<Integer> range(int a, int b) {
+        return List.range(a, b);
+    }
+
+    /* closed range */
+    static List<Integer> rangeC(int a, int b) {
+        return List.rangeClosed(a, b);
+    }
+
+    static Function<?, String> toStr() {
+        return Object::toString;
+    }
+
+    public static <T1, T2, T3, R>
+    R apply(Function3<? super T1, ? super T2, ? super T3, ? extends R> f, Tuple3<T1, T2, T3> tuple) {
+        return tuple.apply(f);
+    }
+
+    /*
+    Madness.
+
+    public static <A, B>
+    B __(Function<A, B> f, A a) {
+        return f.apply(a);
+    }
+
+    map( (customer), constraints)
+
+    void bla() {
+        val addPlayer = __(adjustCellIfElse, cellContainsGoal, Cell.PLAYER_ON_GOAL, Cell.PLAYER_ON_EMPTY);
+    }
+    */
+
+    static List<String> listTupleGenerics(int count) {
+        val p = rangeC(1, count).map(Object::toString);
+        val types = map(concat("T"), p);
+        //val commaTypes = join(", ", types);
+
+        return types;//commaTypes;
+    }
+
+    static String rawTupleGenerics(int count) {
+        return join(", ", listTupleGenerics(count));
+    }
+
+    static String completeTupleGenerics(int count) {
+        val generics = "<" + rawTupleGenerics(count) + ", R>";
+        return generics;
+    }
+
+    static String _apply() {
+        return doWith(
+                rangeC(1, 8),
+                map(i -> "public static " + completeTupleGenerics(i) +
+                            "\nR apply(Function" + i + completeTupleGenerics(i) + " f, Tuple" + i + "<" + rawTupleGenerics(i) + "> tuple) {\n" +
+                            "\treturn tuple.apply(f);\n}"
+                ),
+                join("\n\n")
+        );
+    }
+
+    static List<JFunction> _applyCode() {
+        return doWith(
+                rangeC(1, 8),
+                map(i -> new JFunction(
+                        JFunction.Generate.UNIQUE,
+                        new JSignature(
+                                listTupleGenerics(i).append("R"),
+                                "R",
+                                "apply",
+                                List(
+                                        new JParameter("Function"+i+"<"+rawTupleGenerics(i)+", R>", "f"),
+                                        new JParameter("Tuple"+i+"<"+rawTupleGenerics(i)+">", "tuple")
+                                )
+                        ),
+                        JFunction.Status.WORKS,
+                        "Works on tuples instead of list."
+                ))
+        );
+    }
+
     static Macro DO_WITH = Macro.of(
             academicGenerics,
             (macro, i, max) -> macro.getGenericNames().get(i),
@@ -380,16 +459,20 @@ public class Ramgen {
                         join("\n")
                 );
 
-        List<JFunction> functions = data.getFunctions().map(JFunction::of);
+        List<JFunction> functions = data
+                .getFunctions()
+                .map(JFunction::of)
+                .appendAll(_applyCode());
 
         Map<String, JFunction> javaFunctionMap = functions.toMap(jsonFunction -> Tuple.of(jsonFunction.getSignature().getName(), jsonFunction));
 
 
         String generatedFunctions = doWith(data,
                 JsonData::getFunctions,
-                map(pipe(
-                        tap(f -> println(f.getSignature().getName())),
-                        JFunction::of
+                map(JFunction::of),
+                concat(_applyCode()),
+                sortBy(pipe(
+                        JFunction::getSignature, JSignature::getName
                 )),
                 map(Ramgen::partialize),
                 join("\n\n")
@@ -413,13 +496,19 @@ public class Ramgen {
 
         String generatedCode = join("\n\n\n", List(
                 separator("PARTIAL APPLICATIONS"),
+                _apply(),
                 generatedFunctions,
                 separator("TYPE ALIGNED SEQUENCE FUNCTIONS"),
                 macros
         ));
 
-        //println(generatedCode);
+        /*
+        println(generatedCode);
+        /*/
         println(markdownTable);
+        //*/
+
+        //println(_apply());
 
         //println(partialize(javaFunctionMap.get("concatOptions").get()));
 

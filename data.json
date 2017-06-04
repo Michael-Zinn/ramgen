@@ -58,20 +58,32 @@
 		{
 			"generate": "unique",
 			"signature": { "generics": ["A", "B"], "type": "List<B>", "name": "ap", "parameters": ["List<? extends Function<? super A, ? extends B>>", "fs", "List<A>", "as"] },
-			"status": "incomplete",
-			"comment": "Only works on Lists."
+			"status": "works"
 		},
 		{
 			"generate": "unique",
-			"signature": { "generics": ["L", "R", "T"], "type": "T", "name": "applyTuple", "parameters": ["BiFunction<L, R, T>", "f", "Tuple2<L,R>", "tuple"] },
-			"status": "incomplete",
-			"comment": "Only works on Tuples of size 2 and 3. Will be fixed."
+			"signature": { "generics": ["A", "B"], "type": "List<B>", "name": "ap_List", "parameters": ["List<? extends Function<? super A, ? extends B>>", "fs", "List<A>", "as"] },
+			"status": "works"
 		},
 		{
 			"generate": "unique",
-			"signature": { "generics": ["T1", "T2", "T3", "R"], "type": "R", "name": "applyTuple", "parameters": ["Function3<? super T1, ? super T2, ? super T3, ? extends R>", "f", "Tuple3<T1, T2, T3>", "tuple"] },
-			"status": "incomplete",
-			"comment": "Only works on Tuples of size 2 and 3. Will be fixed."
+			"signature": { "generics": ["A", "B"], "type": "List<B>", "name": "apᐸListᐳ", "parameters": ["List<? extends Function<? super A, ? extends B>>", "fs", "List<A>", "as"] },
+			"status": "works"
+		},
+		{
+			"generate": "unique",
+			"signature": { "generics": ["A", "B"], "type": "Option<B>", "name": "ap_Option", "parameters": ["Option<? extends Function<? super A, ? extends B>>", "fs", "Option<A>", "as"] },
+			"status": "works"
+		},
+		{
+			"generate": "unique",
+			"signature": { "generics": ["A", "B"], "type": "Option<B>", "name": "apᐸOptionᐳ", "parameters": ["Option<? extends Function<? super A, ? extends B>>", "fs", "Option<A>", "as"] },
+			"status": "works"
+		},
+		{
+			"generate": "unique",
+			"signature": { "generics": ["A"], "type": "List<A>", "name": "append", "parameters": ["A", "a", "List<A>", "list"] },
+			"status": "works"
 		},
 		{
 			"signature": { "generics": ["A"], "type": "Predicate<A>", "name": "complement", "parameters": ["Predicate<A>", "predicate"] },
@@ -120,8 +132,23 @@
 		},
 		{
 			"signature": { "generics": ["A", "B"], "type": "List<B>", "name": "flatMap", "parameters": ["Function<A, List<B>>", "f", "List<A>", "ma"] },
-			"status": "incomplete",
-			"comment": "Only for lists?"
+			"status": "works"
+		},
+		{
+			"signature": { "generics": ["A", "B"], "type": "List<B>", "name": "flatMap_List", "parameters": ["Function<A, List<B>>", "f", "List<A>", "ma"] },
+			"status": "works"
+		},
+		{
+			"signature": { "generics": ["A", "B"], "type": "List<B>", "name": "flatMapᐸListᐳ", "parameters": ["Function<A, List<B>>", "f", "List<A>", "ma"] },
+			"status": "works"
+		},
+		{
+			"signature": { "generics": ["A", "B"], "type": "Option<B>", "name": "flatMap_Option", "parameters": ["Function<A, Option<B>>", "f", "Option<A>", "ma"] },
+			"status": "works"
+		},
+		{
+			"signature": { "generics": ["A", "B"], "type": "Option<B>", "name": "flatMapᐸOptionᐳ", "parameters": ["Function<A, Option<B>>", "f", "Option<A>", "ma"] },
+			"status": "works"
 		},
 		{
 			"signature": { "generics": ["A"], "type": "List<A>", "name": "forEach", "parameters": ["Consumer<A>", "consumer", "List<A>", "list"] },
@@ -140,6 +167,16 @@
 		},
 		{
 			"signature": { "generics": ["A"], "type": "Option<A>", "name": "head", "parameters": ["List<A>", "list"] },
+			"status": "works"
+		},
+		{
+			"generate": "none",
+			"signature": { "generics": [], "type": "Option<Character>", "name": "head_String", "parameters": ["String", "string"] },
+			"status": "works"
+		},
+		{
+			"generate": "none",
+			"signature": { "generics": [], "type": "Option<Character>", "name": "headᐸStringᐳ", "parameters": ["String", "string"] },
 			"status": "works"
 		},
 		{
@@ -185,7 +222,19 @@
 			"status": "works"
 		},
 		{
+			"signature": { "generics": ["A", "B"], "type": "List<B>", "name": "map_List", "parameters": ["Function<A, B>", "f", "List<A>", "value"] },
+			"status": "works"
+		},
+		{
+			"signature": { "generics": ["A", "B"], "type": "List<B>", "name": "mapᐸListᐳ", "parameters": ["Function<A, B>", "f", "List<A>", "value"] },
+			"status": "works"
+		},
+		{
 			"signature": { "generics": ["A", "B"], "type": "Option<B>", "name": "map_Option", "parameters": ["Function<A, B>", "f", "Option<A>", "value"] },
+			"status": "works"
+		},
+		{
+			"signature": { "generics": ["A", "B"], "type": "Option<B>", "name": "mapᐸOptionᐳ", "parameters": ["Function<A, B>", "f", "Option<A>", "value"] },
 			"status": "works"
 		},
 		{
@@ -193,8 +242,21 @@
 			"status": "works"
 		},
 		{
-			"signature": { "generics": ["L", "R", "Z"], "type": "Either<Z, R>", "name": "map_Either_left", "parameters": ["Function<L, Z>", "f", "Either<L, R>", "value"] },
+			"signature": { "generics": ["L", "R", "Z"], "type": "Either<L, Z>", "name": "mapᐸEitherᐳ", "parameters": ["Function<R, Z>", "f", "Either<L, R>", "value"] },
 			"status": "works"
+		},
+		{
+			"signature": { "generics": ["L", "R", "Z"], "type": "Either<Z, R>", "name": "mapLeft", "parameters": ["Function<L, Z>", "f", "Either<L, R>", "value"] },
+			"status": "bonus",
+			"comment": "Maps the left side of an Either"
+		},
+		{
+			"signature": { "generics": ["L", "R", "Z"], "type": "Either<Z, R>", "name": "mapLeft_Either", "parameters": ["Function<L, Z>", "f", "Either<L, R>", "value"] },
+			"status": "bonus"
+		},
+		{
+			"signature": { "generics": ["L", "R", "Z"], "type": "Either<Z, R>", "name": "mapLeftᐸEitherᐳ", "parameters": ["Function<L, Z>", "f", "Either<L, R>", "value"] },
+			"status": "bonus"
 		},
 		{
 			"signature": { "generics": ["A"], "type": "Boolean", "name": "none", "parameters": ["Predicate<A>", "predicate", "List<A>", "list"] },
@@ -212,6 +274,28 @@
 		{
 			"signature": { "generics": ["S extends Copyable<S>", "A"], "type": "S", "name": "over", "parameters": ["Lens<S, A>", "lens", "Function<A, A>", "f", "S", "x"] },
 			"status": "works"
+		},
+		{
+			"generate": "unique",
+			"signature": { "generics": ["A"], "type": "List<A>", "name": "prepend", "parameters": ["A", "a", "List<A>", "list"] },
+			"status": "works"
+		},
+		{
+			"generate": "all",
+			"signature": { "generics": [], "type": "List<Integer>", "name": "range", "parameters": ["Integer", "from", "Integer", "toExclusive"] },
+			"status": "works"
+		},
+		{
+			"generate": "all",
+			"signature": { "generics": [], "type": "List<Integer>", "name": "rangeC", "parameters": ["Integer", "from", "Integer", "to"] },
+			"status": "bonus",
+			"comment": "Closed range"
+		},
+		{
+			"generate": "none",
+			"signature": { "generics": ["A"], "type": "List<A>", "name": "repeat", "parameters": ["Integer", "n", "A", "a"] },
+			"status": "incomplete",
+			"comment": "Can't be curried."
 		},
 		{
 			"signature": { "generics": ["A"], "type": "List<A>", "name": "reverse", "parameters": ["List<A>", "list"] },
