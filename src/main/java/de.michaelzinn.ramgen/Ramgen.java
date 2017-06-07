@@ -5,7 +5,6 @@ import de.michaelzinn.ramgen.java.JParameter;
 import de.michaelzinn.ramgen.java.JSignature;
 import de.michaelzinn.ramgen.json.*;
 import de.michaelzinn.ramgen.macro.Macro;
-import de.michaelzinn.ravr.Ravr;
 import io.vavr.*;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
@@ -39,18 +38,6 @@ public class Ramgen {
             defaultTo("")
     );
 
-    /*
-    static String generateGenerics(JSignature sig) {
-
-        return pipe(
-                JSignature::getGenerics,
-                joinOption(", "),
-                option -> option.map(g -> "<" + g + ">\n"),
-                defaultTo("")
-        ).apply(sig);
-
-    }
-    */
 
     static String generatePartialParameters(List<Boolean> placeholders, JSignature sig) {
         return doWith(placeholders
@@ -73,7 +60,7 @@ public class Ramgen {
 
     static List<JParameter> placeholdered(List<Boolean> placeholders, JSignature sig) {
         return placeholders.zip(sig.getParameters())
-                .map(apply((use,  param) ->
+                .map(apply((use, param) ->
                         new JParameter(use ? param.getType() : "Placeholder", (use ? "" : "_") + param.getName())
                 ));
     }
@@ -111,26 +98,6 @@ public class Ramgen {
     }
 
 
-    static String toCode(JSignature sig) {
-
-        val strGenerics = doWith(sig,
-                JSignature::getGenerics,
-                joinOption(", "),
-                option -> option.map((String g) -> " <" + g + ">\n"),
-                defaultTo("")
-        );
-
-        val strParams = doWith(sig,
-                JSignature::getParameters,
-                map((JParameter p) -> p.getType() + " " + p.getName()),
-                join(", ")
-        );
-
-        return "public static" + strGenerics +
-                sig.getName() + "(" + strParams + ") {\n";
-
-    }
-
     static int intPow(int x, int exponent) {
         return exponent == 0 ? 1 : x * intPow(x, exponent - 1);
     }
@@ -143,7 +110,7 @@ public class Ramgen {
 
     // TODO get this to work in Ravr
     public static <T1, T2, R>
-    Function<Tuple2<T1, T2>,R> apply(BiFunction<T1, T2, R> f) {
+    Function<Tuple2<T1, T2>, R> apply(BiFunction<T1, T2, R> f) {
         return tuple -> tuple.apply(f);
     }
 
@@ -188,10 +155,7 @@ public class Ramgen {
 
 
     static String ruby(String string, int multiplier) {
-        return doWith(List.range(0, multiplier),
-                map(always(string)),
-                join("")
-        );
+        return join("", repeat(multiplier, string));
     }
 
     static String rpad(String string, String padding, int size) {
@@ -200,11 +164,6 @@ public class Ramgen {
 
     static String separator(String text) {
         return rpad("// " + text + " ", "/", 120);
-    }
-
-    // TODO to ravr
-    static <T, C extends Comparable<C>> List<T> sortBy(Function<T, C> by, List<T> list) {
-        return list.sortBy(by);//a -> by.apply(a));
     }
 
     abstract class ParameterNameGenerator implements Function4<Integer, Integer, String, String, String> {
@@ -219,11 +178,13 @@ public class Ramgen {
     }
 
 
+    /*
     // TODO to ravr
     static <T, C extends Comparable<C>>
     Function<List<T>, List<T>> sortBy(Function<T, C> by) {
         return list -> sortBy(by, list);
     }
+    */
 
     // TODO ravr
     static <T>
@@ -277,8 +238,8 @@ public class Ramgen {
         return doWith(
                 rangeC(1, 8),
                 map(i -> "public static " + completeTupleGenerics(i) +
-                            "\nR apply(Function" + i + completeTupleGenerics(i) + " f, Tuple" + i + "<" + rawTupleGenerics(i) + "> tuple) {\n" +
-                            "\treturn tuple.apply(f);\n}"
+                        "\nR apply(Function" + i + completeTupleGenerics(i) + " f, Tuple" + i + "<" + rawTupleGenerics(i) + "> tuple) {\n" +
+                        "\treturn tuple.apply(f);\n}"
                 ),
                 join("\n\n")
         );
@@ -294,8 +255,8 @@ public class Ramgen {
                                 "R",
                                 "apply",
                                 List(
-                                        new JParameter("Function"+i+"<"+rawTupleGenerics(i)+", R>", "f"),
-                                        new JParameter("Tuple"+i+"<"+rawTupleGenerics(i)+">", "tuple")
+                                        new JParameter("Function" + i + "<" + rawTupleGenerics(i) + ", R>", "f"),
+                                        new JParameter("Tuple" + i + "<" + rawTupleGenerics(i) + ">", "tuple")
                                 )
                         ),
                         JFunction.Status.WORKS,
@@ -414,13 +375,6 @@ public class Ramgen {
         );
     }
 
-    /*
-    public static <A>
-    Function<A, List<A>> repeat(int n) {
-        return a -> Ravr.repeat(n, a);
-    }
-    */
-
     public static <A>
     List<A> times(Function<Integer, A> fn, Integer n) {
         return range(0, n).map(fn);
@@ -479,17 +433,20 @@ public class Ramgen {
                 doWith(allNames,
                         map(
                                 ifElse(functionMap::containsKey,
-                                        pipe(functionMap::get, Option::get, function -> {
 
+                                        pipe(functionMap::get, Option::get, function -> {
                                             val icon = statusIdIcon.get(function.getStatus()).get();
                                             val name = function.signature.getName();
                                             val comment = nullTo("", function.comment);
 
                                             return "| " + icon + " | " + name + " | " + comment + "|";
                                         }),
+
+
                                         missingName -> "| " + statusIdIcon.get(
                                                 data.blacklist.contains(missingName) ? "rejected" : "missing"
                                         ).get() + " | " + missingName + " |   |"
+
                                 )
                         ),
                         join("\n")
@@ -507,9 +464,7 @@ public class Ramgen {
                 JsonData::getFunctions,
                 map(JFunction::of),
                 concat(_applyCode()),
-                sortBy(pipe(
-                        JFunction::getSignature, JSignature::getName
-                )),
+                sortBy(pipe(JFunction::getSignature, JSignature::getName)),
                 map(Ramgen::partialize),
                 join("\n\n")
         );
