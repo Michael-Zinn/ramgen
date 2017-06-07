@@ -3,7 +3,6 @@ package de.michaelzinn.ramgen;
 import io.vavr.collection.List;
 
 import static de.michaelzinn.ravr.Ravr.always;
-import static de.michaelzinn.ravr.Ravr.applyTuple;
 
 /**
  * Created by michael on 26.05.17.

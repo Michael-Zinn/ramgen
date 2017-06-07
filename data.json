@@ -292,10 +292,8 @@
 			"comment": "Closed range"
 		},
 		{
-			"generate": "none",
 			"signature": { "generics": ["A"], "type": "List<A>", "name": "repeat", "parameters": ["Integer", "n", "A", "a"] },
-			"status": "incomplete",
-			"comment": "Can't be curried."
+			"status": "incomplete"
 		},
 		{
 			"signature": { "generics": ["A"], "type": "List<A>", "name": "reverse", "parameters": ["List<A>", "list"] },

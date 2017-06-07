@@ -7,7 +7,7 @@ import lombok.Getter;
 
 import static de.michaelzinn.ramgen.FunctionUtils.evens;
 import static de.michaelzinn.ramgen.FunctionUtils.odds;
-import static de.michaelzinn.ravr.Ravr.applyTuple;
+import static de.michaelzinn.ravr.Ravr.*;
 
 
 /**
@@ -30,7 +30,7 @@ public class JSignature {
     public static JSignature def(List<String> generics, String type, String name, List<String> rawParameters) {
         List<JParameter> parameters =
                 evens(rawParameters).zip(odds(rawParameters))
-                .map(applyTuple((l, r) -> new JParameter(l, r)));
+                .map(apply((l, r) -> new JParameter(l, r)));
 
         return new JSignature(generics, type, name, parameters);
     }
@@ -38,7 +38,7 @@ public class JSignature {
     public static JSignature fromJsonSignature(JsonSignature jsonSig) {
         List<JParameter> parameters =
                 evens(jsonSig.parameters).zip(odds(jsonSig.parameters))
-                .map(applyTuple((l, r) -> new JParameter(l, r)));
+                .map(apply((l, r) -> new JParameter(l, r)));
 
         return new JSignature(jsonSig.generics, jsonSig.type, jsonSig.name, parameters);
     }

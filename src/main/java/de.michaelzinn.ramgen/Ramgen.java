@@ -5,12 +5,14 @@ import de.michaelzinn.ramgen.java.JParameter;
 import de.michaelzinn.ramgen.java.JSignature;
 import de.michaelzinn.ramgen.json.*;
 import de.michaelzinn.ramgen.macro.Macro;
+import de.michaelzinn.ravr.Ravr;
 import io.vavr.*;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.control.Option;
 import lombok.val;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static de.michaelzinn.ravr.Placeholder.__;
@@ -33,7 +35,7 @@ public class Ramgen {
     static Function<JSignature, String> generateGenerics = pipe(
             JSignature::getGenerics,
             joinOption(", "),
-            option -> option.map(g -> "<" + g + ">\n"),
+            mapᐸOptionᐳ(generics -> "<" + generics + ">\n"),
             defaultTo("")
     );
 
@@ -71,7 +73,7 @@ public class Ramgen {
 
     static List<JParameter> placeholdered(List<Boolean> placeholders, JSignature sig) {
         return placeholders.zip(sig.getParameters())
-                .map(applyTuple((use, param) ->
+                .map(apply((use,  param) ->
                         new JParameter(use ? param.getType() : "Placeholder", (use ? "" : "_") + param.getName())
                 ));
     }
@@ -133,6 +135,19 @@ public class Ramgen {
         return exponent == 0 ? 1 : x * intPow(x, exponent - 1);
     }
 
+    // TODO get this to work in Ravr
+    public static <T1, T2, R>
+    R apply(BiFunction<T1, T2, R> f, Tuple2<T1, T2> tuple) {
+        return tuple.apply(f);
+    }
+
+    // TODO get this to work in Ravr
+    public static <T1, T2, R>
+    Function<Tuple2<T1, T2>,R> apply(BiFunction<T1, T2, R> f) {
+        return tuple -> tuple.apply(f);
+    }
+
+
     static String partialize(JFunction jFunction) {
         JSignature sig = jFunction.getSignature();
 
@@ -141,7 +156,7 @@ public class Ramgen {
         List<Tuple2<Integer, List<Integer>>> combinationsInt = paramCount.map(x ->
                 Tuple.of(x, List.range(0, intPow(2, x))));
 
-        List<List<Boolean>> binaries = combinationsInt.flatMap(applyTuple((count, combinations) ->
+        List<List<Boolean>> binaries = combinationsInt.flatMap(apply((count, combinations) ->
                 combinations.isEmpty() ? List.of(List.empty()) :
                         combinations.map(c -> Binary.toLittleEndianBooleans(count, c))
         ));
@@ -215,15 +230,6 @@ public class Ramgen {
     Function<List<T>, List<T>> uniq() {
         // TODO this destroys the order?
         return list -> list.toSet().toList();
-    }
-
-    static List<Integer> range(int a, int b) {
-        return List.range(a, b);
-    }
-
-    /* closed range */
-    static List<Integer> rangeC(int a, int b) {
-        return List.rangeClosed(a, b);
     }
 
     static Function<?, String> toStr() {
@@ -408,6 +414,34 @@ public class Ramgen {
         );
     }
 
+    /*
+    public static <A>
+    Function<A, List<A>> repeat(int n) {
+        return a -> Ravr.repeat(n, a);
+    }
+    */
+
+    public static <A>
+    List<A> times(Function<Integer, A> fn, Integer n) {
+        return range(0, n).map(fn);
+    }
+
+    static List<String> toList(String s) {
+        return times(n -> s.charAt(n) + "", s.length());
+    }
+
+    static String simplify(String s) {
+        return doWith(s,
+                toLower(),
+                Ramgen::toList,
+                map(ifElse(contains(__, toList("abcdefghijklmnopqrstuvwxyz0123456789")),
+                        identity(),
+                        always(" ")
+                )),
+                join("")
+        );
+    }
+
 
     public static void main(String[] args) {
 
@@ -426,15 +460,17 @@ public class Ramgen {
                 concat(__, ramdaNames),
                 uniq(),
                 without(data.getHide()),
-                sortBy(toUpper())
+                sortBy(Ramgen::simplify)
         );
 
         Map<String, JsonFunction> functionMap = data.getFunctions().toMap(fs -> fs.getSignature().getName(), x -> x);
 
+        /*
         String allNamesString = pipe(
                 (List<String> l) -> l.sortBy(toUpper()),
                 join("\n")
         ).apply(allNames);
+        */
 
         Map<String, String> statusIdIcon = data.status.toMap(JsonStatus::getId, JsonStatus::getIcon);
 

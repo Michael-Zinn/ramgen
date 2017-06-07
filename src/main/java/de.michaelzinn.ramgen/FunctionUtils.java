@@ -5,8 +5,6 @@ import io.vavr.collection.List;
 
 import java.util.function.Predicate;
 
-import static de.michaelzinn.ravr.Ravr.applyTuple;
-import static de.michaelzinn.ravr.Ravr.pipe;
 
 /**
  * Created by michael on 26.05.17.
