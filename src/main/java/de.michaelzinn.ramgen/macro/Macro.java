@@ -19,6 +19,7 @@ import static de.michaelzinn.ravr.Ravr.*;
 @AllArgsConstructor(staticName = "of")
 public class Macro {
 
+    List<String> javadoc;
 
     List<String> genericNames;
 
@@ -32,9 +33,19 @@ public class Macro {
     String bodyCore;
     SubMacro<Tuple2<String, String>> bodyMacro;
 
-    public String expandOne(int macroParameterCount) {
+    public String javadocify(List<String> javadocLines) {
+        return doWith(javadocLines,
+                map(concat("\t * ")),
+                joinOption("\n"),
+                mapᐸOptionᐳ(doc -> "\t/**\n" + doc + "\n\t */\n"),
+                defaultTo("")
+        );
 
-        return "\tpublic static " + joinOption(", ", genericNames.take(macroParameterCount + 1)).map(s -> "<" + s + ">\n\t").getOrElse("") +
+    }
+
+    public String expandOne(int macroParameterCount) {
+        return javadocify(javadoc) +
+                "\tpublic static " + joinOption(", ", genericNames.take(macroParameterCount + 1)).map(s -> "<" + s + ">\n\t").getOrElse("") +
                 typeMacro.expand(this, macroParameterCount, macroParameterCount) + " " +
                 name + "(\n\t\t" +
                 doWith(

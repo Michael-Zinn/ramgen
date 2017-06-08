@@ -12,6 +12,7 @@ import io.vavr.control.Option;
 import lombok.val;
 
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static de.michaelzinn.ravr.Placeholder.__;
@@ -266,6 +267,7 @@ public class Ramgen {
     }
 
     static Macro DO_WITH = Macro.of(
+            List(),
             academicGenerics,
             (macro, i, max) -> macro.getGenericNames().get(i),
             "doWith",
@@ -286,6 +288,7 @@ public class Ramgen {
     );
 
     static Macro _predicatePipe = Macro.of(
+            List(),
             academicGenerics,
             (macro, i, max) -> "Predicate<A>",
             "pipe_Predicate",
@@ -309,6 +312,7 @@ public class Ramgen {
     );
 
     static Macro _pipe = Macro.of(
+            List(),
             academicGenerics,
             (macro, i, max) -> "Function<A, " + macro.getGenericNames().get(i) + ">",
             "pipe",
@@ -329,6 +333,7 @@ public class Ramgen {
     );
 
     static Macro COMPOSE = Macro.of(
+            List(),
             academicGenerics,
             (macro, i, max) -> "Function<A, " + macro.getGenericNames().get(i) + ">",
             "compose",
@@ -350,6 +355,7 @@ public class Ramgen {
 
     static Macro _pipeK(String m) {
         return Macro.of(
+                List(),
                 academicGenerics,
                 (macro, i, max) -> "Function<A, " + m + "<" + macro.getGenericNames().get(i) + ">>",
                 "pipeK_" + m,
@@ -375,6 +381,113 @@ public class Ramgen {
         );
     }
 
+    static Macro _orDefault = Macro.of(
+            List(
+                     "Returns the first parameter that is not null.",
+                     "",
+                     "The last parameter must not be null.",
+                     "",
+                     "@param nullables",
+                     "@param defaultValue Must not be null.",
+                     "@return First parameter that is not null"
+            ),
+            List("T"),
+
+            (macro, i, max) -> "T",
+            "orDefault",
+            List(),
+            (macro, i, max) -> "@Nullable T nullable" + (i + 1),
+            (macro, i, max) -> List("T defaultValue"),
+
+            (macro, i, max) -> Tuple.of("\t\treturn\n", "\t\t\tdefaultValue;\n"),
+            "",
+            (macro, i, max) -> Tuple.of("", "\t\t\tnullable" + (i + 1) + " != null ? nullable" + (i + 1) + " :\n")
+    );
+
+    static List<String> letJavadoc = List(
+            "Threads the first parameter through the following function parameters.",
+            "",
+            "Aborts and returns null when any step in the sequence returns null, otherwise it returns the result of the last function or void if the last parameter is a Consumer.",
+            "",
+            "@param t Input value, may be null.",
+            "@param fs A typed sequence of functions.",
+            "@return Result or null if the last parameter is a function, otherwise void"
+    );
+
+    static Macro _letFunctions = Macro.of(
+            letJavadoc,
+            enterpriseGenerics,
+
+            (macro, i, max) -> "@Nullable " + macro.getGenericNames().get(i),
+            "let",
+            List("@Nullable T t"),
+            (macro, i, max) -> {
+                String in = macro.getGenericNames().get(i);
+                String out = macro.getGenericNames().get(i + 1);
+                return "Function<? super " + in + ", @Nullable " + out + "> f_" + in + "_" + out;
+            },
+            (macro, i, max) -> List(),
+
+            (macro, i, max) -> {
+                String in = macro.getGenericNames().get(max - 1);
+                String out = macro.getGenericNames().get(max);
+                String varName = in.toLowerCase();
+                return Tuple.of(
+                        "\t\tif(t == null) return null;\n",
+                        "\t\treturn f_" + in + "_" + out + ".apply(" + varName + ");\n"
+                );
+            },
+            "",
+            (macro, i, max) -> {
+                String in = macro.getGenericNames().get(i);
+                String out = macro.getGenericNames().get(i + 1);
+                String varName = out.toLowerCase();
+                return
+                        Tuple.of(
+                                "",
+                                i == max ?
+                                        "":
+                                "\t\t@Nullable " + out + " " + varName + " = f_" + in + "_" + out + ".apply(" + in.toLowerCase() + ");\n" +
+                        "\t\tif(" + varName + " == null) return null;\n");
+            }
+    );
+
+    static Macro _letConsumer = Macro.of(
+            letJavadoc,
+            enterpriseGenerics,
+
+            (macro, i, max) -> "void",
+            "let",
+            List("@Nullable T t"),
+            (macro, i, max) -> {
+                String in = macro.getGenericNames().get(i);
+                String out = macro.getGenericNames().get(i + 1);
+                return "Function<? super " + in + ", @Nullable " + out + "> f_" + in + "_" + out;
+            },
+            (macro, i, max) -> {
+                String in = macro.getGenericNames().get(i);
+
+                return List("Consumer<? super " + in + "> c_" + in);
+            },
+
+            (macro, i, max) -> {
+                String in = macro.getGenericNames().get(max);
+                String varName = in.toLowerCase();
+                return Tuple.of(
+                        "\t\tif(t == null) return;\n",
+                        "\t\tc_" + in + ".accept(" + varName + ");\n"
+                );
+            },
+            "",
+            (macro, i, max) -> {
+                String in = macro.getGenericNames().get(i);
+                String out = macro.getGenericNames().get(i + 1);
+                String varName = out.toLowerCase();
+                return Tuple.of("", "\t\t@Nullable " + out + " " + varName + " = f_" + in + "_" + out + ".apply(" + in.toLowerCase() + ");\n" +
+                        "\t\tif(" + varName + " == null) return;\n");
+            }
+    );
+
     public static <A>
     List<A> times(Function<Integer, A> fn, Integer n) {
         return range(0, n).map(fn);
@@ -399,13 +512,13 @@ public class Ramgen {
 
     public static void main(String[] args) {
 
-        JsonData data = ReadJson.getData();
+        JsonData jsonData = ReadJson.getData();
 
         List<JsonRamdaDoc> ramdaDoc = ReadJson.getRamdaDoc();
 
         List<String> ramdaNames = ramdaDoc.map(JsonRamdaDoc::getName);
 
-        List<String> allNames = doWith(data,
+        List<String> allNames = doWith(jsonData,
                 JsonData::getFunctions,
                 map(pipe(
                         JsonFunction::getSignature,
@@ -413,11 +526,11 @@ public class Ramgen {
                 )),
                 concat(__, ramdaNames),
                 uniq(),
-                without(data.getHide()),
+                without(jsonData.getHide()),
                 sortBy(Ramgen::simplify)
         );
 
-        Map<String, JsonFunction> functionMap = data.getFunctions().toMap(fs -> fs.getSignature().getName(), x -> x);
+        Map<String, JsonFunction> functionMap = jsonData.getFunctions().toMap(fs -> fs.getSignature().getName(), x -> x);
 
         /*
         String allNamesString = pipe(
@@ -426,7 +539,7 @@ public class Ramgen {
         ).apply(allNames);
         */
 
-        Map<String, String> statusIdIcon = data.status.toMap(JsonStatus::getId, JsonStatus::getIcon);
+        Map<String, String> statusIdIcon = jsonData.status.toMap(JsonStatus::getId, JsonStatus::getIcon);
 
         String markdownTable = "| Status | Function | Note |\n" +
                 "|:----:|:--------|:-----|\n" +
@@ -444,7 +557,7 @@ public class Ramgen {
 
 
                                         missingName -> "| " + statusIdIcon.get(
-                                                data.blacklist.contains(missingName) ? "rejected" : "missing"
+                                                jsonData.blacklist.contains(missingName) ? "rejected" : "missing"
                                         ).get() + " | " + missingName + " |   |"
 
                                 )
@@ -452,7 +565,7 @@ public class Ramgen {
                         join("\n")
                 );
 
-        List<JFunction> functions = data
+        List<JFunction> functions = jsonData
                 .getFunctions()
                 .map(JFunction::of)
                 .appendAll(_applyCode());
@@ -460,7 +573,7 @@ public class Ramgen {
         Map<String, JFunction> javaFunctionMap = functions.toMap(jsonFunction -> Tuple.of(jsonFunction.getSignature().getName(), jsonFunction));
 
 
-        String generatedFunctions = doWith(data,
+        String generatedFunctions = doWith(jsonData,
                 JsonData::getFunctions,
                 map(JFunction::of),
                 concat(_applyCode()),
@@ -471,11 +584,12 @@ public class Ramgen {
 
 
         // macros
-        String macros = doWith(List.of(
-                COMPOSE,
-                _pipe,
-                _predicatePipe,
-                DO_WITH
+        String macros = doWith(
+                List(
+                        COMPOSE,
+                        _pipe,
+                        _predicatePipe,
+                        DO_WITH
                 ),
                 concat(__, map(Ramgen::_pipeK, List.of(
                         "List",
@@ -493,8 +607,21 @@ public class Ramgen {
                 macros
         ));
 
-        /*
-        println(generatedCode);
+
+        String null4jmacros = doWith(
+                List(
+                        _orDefault.expand(9),
+                        _letFunctions.expand(9),
+                        _letConsumer.expand(8)
+                ),
+                join("\n\n\n\n")
+                //code -> "/*\n" + code + "\n*/"
+        );
+
+        println(null4jmacros);
+
+        //*
+        //println(generatedCode);
         /*/
         println(markdownTable);
         //*/
