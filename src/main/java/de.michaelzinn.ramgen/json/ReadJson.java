@@ -20,7 +20,7 @@ public class ReadJson {
         return mapper;
     }
 
-    //*
+    /*
     private static String path = "/Users/michaelzinn/projects/ramgen/";
     /*/
     private static String path = "/home/michael/IdeaProjects/ramgen/";

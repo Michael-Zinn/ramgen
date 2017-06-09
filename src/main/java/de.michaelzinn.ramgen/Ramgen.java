@@ -11,14 +11,14 @@ import io.vavr.collection.Map;
 import io.vavr.control.Option;
 import lombok.val;
 
+import java.util.HashMap;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static de.michaelzinn.ravr.Placeholder.__;
 import static de.michaelzinn.ravr.Ravr.*;
-import static io.vavr.API.List;
-import static io.vavr.API.println;
+import static io.vavr.API.*;
 
 
 /**
@@ -383,13 +383,13 @@ public class Ramgen {
 
     static Macro _orDefault = Macro.of(
             List(
-                     "Returns the first parameter that is not null.",
-                     "",
-                     "The last parameter must not be null.",
-                     "",
-                     "@param nullables",
-                     "@param defaultValue Must not be null.",
-                     "@return First parameter that is not null"
+                    "Returns the first parameter that is not null.",
+                    "",
+                    "The last parameter must not be null.",
+                    "",
+                    "@param nullables",
+                    "@param defaultValue Must not be null.",
+                    "@return First parameter that is not null"
             ),
             List("T"),
 
@@ -446,9 +446,9 @@ public class Ramgen {
                         Tuple.of(
                                 "",
                                 i == max ?
-                                        "":
-                                "\t\t@Nullable " + out + " " + varName + " = f_" + in + "_" + out + ".apply(" + in.toLowerCase() + ");\n" +
-                        "\t\tif(" + varName + " == null) return null;\n");
+                                        "" :
+                                        "\t\t@Nullable " + out + " " + varName + " = f_" + in + "_" + out + ".apply(" + in.toLowerCase() + ");\n" +
+                                                "\t\tif(" + varName + " == null) return null;\n");
             }
     );
 
@@ -509,6 +509,32 @@ public class Ramgen {
         );
     }
 
+    static java.util.Map<String, Object> defs = new HashMap<>();
+
+
+    public static <P1, R>
+    void defn(String functionName, Function<P1, R> function) {
+        defs.put(functionName, function);
+    }
+
+    public static <P1, P2, R>
+    void defn(String functionName, BiFunction<P1, P2, R> function) {
+        defs.put(functionName, function);
+    }
+
+    public static <P1, R>
+    R c(String functionName, P1 parameter1) {
+        return ((Function<P1, R>) defs.get(functionName)).apply(parameter1);
+    }
+
+    public static <P1, P2, R>
+    R c(String functionName, P1 parameter1, P2 parameter2) {
+        return ((BiFunction<P1, P2, R>) defs.get(functionName)).apply(parameter1, parameter2);
+    }
+
+    public static Integer add(Object x, Object y) {
+        return (Integer) x + (Integer) y;
+    }
 
     public static void main(String[] args) {
 
@@ -661,6 +687,23 @@ public class Ramgen {
 
         println(join("\n\n", generatedFunctions));
         //*/
+
+        // lol
+        defn("add", (Integer x, Integer y) ->
+                x + y );
+
+        defn("fib", (Integer n) ->
+                Match(n).of(
+                        Case($(0), 1),
+                        Case($(1), 1),
+                        Case($(), o ->
+                                c("add",
+                                        c("fib", subtract(n, 2)),
+                                        c("fib", n - 1)))));
+
+        rangeC(1, 10)
+                .map(x -> c("fib", x))
+                .forEach(System.out::println);
 
     }
 }
