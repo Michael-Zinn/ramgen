@@ -462,12 +462,18 @@ public class Ramgen {
             (macro, i, max) -> {
                 String in = macro.getGenericNames().get(i);
                 String out = macro.getGenericNames().get(i + 1);
-                return "Function<? super " + in + ", @Nullable " + out + "> f_" + in + "_" + out;
+                return i == max  - 1?
+                        "Consumer<? super " + in + "> c_" + in :
+
+                        "Function<? super " + in + ", @Nullable " + out + "> f_" + in + "_" + out;
             },
             (macro, i, max) -> {
+                return List();
+                /*
                 String in = macro.getGenericNames().get(i);
 
                 return List("Consumer<? super " + in + "> c_" + in);
+                */
             },
 
             (macro, i, max) -> {
@@ -475,7 +481,7 @@ public class Ramgen {
                 String varName = in.toLowerCase();
                 return Tuple.of(
                         "\t\tif(t == null) return;\n",
-                        "\t\tc_" + in + ".accept(" + varName + ");\n"
+                        ""
                 );
             },
             "",
@@ -483,8 +489,12 @@ public class Ramgen {
                 String in = macro.getGenericNames().get(i);
                 String out = macro.getGenericNames().get(i + 1);
                 String varName = out.toLowerCase();
-                return Tuple.of("", "\t\t@Nullable " + out + " " + varName + " = f_" + in + "_" + out + ".apply(" + in.toLowerCase() + ");\n" +
-                        "\t\tif(" + varName + " == null) return;\n");
+                return Tuple.of("",
+                        i == max  ?
+                                "\t\tc_" + in + ".accept(" + in.toLowerCase() + ");\n" :
+                                "\t\t@Nullable " + out + " " + varName + " = f_" + in + "_" + out + ".apply(" + in.toLowerCase() + ");\n" +
+                        "\t\tif(" + varName + " == null) return;\n"
+                );
             }
     );
 
@@ -638,7 +648,7 @@ public class Ramgen {
                 List(
                         _orDefault.expand(9),
                         _letFunctions.expand(9),
-                        _letConsumer.expand(8)
+                        _letConsumer.expand(9)
                 ),
                 join("\n\n\n\n")
                 //code -> "/*\n" + code + "\n*/"
@@ -701,9 +711,11 @@ public class Ramgen {
                                         c("fib", subtract(n, 2)),
                                         c("fib", n - 1)))));
 
+        /*
         rangeC(1, 10)
                 .map(x -> c("fib", x))
                 .forEach(System.out::println);
+                */
 
     }
 }
