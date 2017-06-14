@@ -23,6 +23,8 @@ public class Macro {
 
     List<String> genericNames;
 
+    SubMacro<List<String>> typeVariablesMacro;
+
     SubMacro<String> typeMacro;
     String name;
     List<String> initialParameters;
@@ -43,9 +45,12 @@ public class Macro {
 
     }
 
+    public static SubMacro<List<String>> MORE_GENERICS = (m, i, max) -> m.genericNames.take(i + 1);
+    public static SubMacro<List<String>> LESS_GENERICS = (m, i, max) -> m.genericNames.take(i);
+
     public String expandOne(int macroParameterCount) {
         return javadocify(javadoc) +
-                "\tpublic static " + joinOption(", ", genericNames.take(macroParameterCount + 1)).map(s -> "<" + s + ">\n\t").getOrElse("") +
+                "\tpublic static " + joinOption(", ", typeVariablesMacro.expand(this, macroParameterCount, macroParameterCount)).map(s -> "<" + s + ">\n\t").getOrElse("") +
                 typeMacro.expand(this, macroParameterCount, macroParameterCount) + " " +
                 name + "(\n\t\t" +
                 doWith(

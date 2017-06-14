@@ -269,6 +269,7 @@ public class Ramgen {
     static Macro DO_WITH = Macro.of(
             List(),
             academicGenerics,
+            Macro.MORE_GENERICS,
             (macro, i, max) -> macro.getGenericNames().get(i),
             "doWith",
             List("A value"),
@@ -290,6 +291,7 @@ public class Ramgen {
     static Macro _predicatePipe = Macro.of(
             List(),
             academicGenerics,
+            Macro.MORE_GENERICS,
             (macro, i, max) -> "Predicate<A>",
             "pipe_Predicate",
             List(),
@@ -314,6 +316,7 @@ public class Ramgen {
     static Macro _pipe = Macro.of(
             List(),
             academicGenerics,
+            Macro.MORE_GENERICS,
             (macro, i, max) -> "Function<A, " + macro.getGenericNames().get(i) + ">",
             "pipe",
             List(),
@@ -335,6 +338,7 @@ public class Ramgen {
     static Macro COMPOSE = Macro.of(
             List(),
             academicGenerics,
+            Macro.MORE_GENERICS,
             (macro, i, max) -> "Function<A, " + macro.getGenericNames().get(i) + ">",
             "compose",
             List(),
@@ -357,6 +361,7 @@ public class Ramgen {
         return Macro.of(
                 List(),
                 academicGenerics,
+                Macro.MORE_GENERICS,
                 (macro, i, max) -> "Function<A, " + m + "<" + macro.getGenericNames().get(i) + ">>",
                 "pipeK_" + m,
                 List(),
@@ -393,6 +398,7 @@ public class Ramgen {
             ),
             List("T"),
 
+            Macro.MORE_GENERICS,
             (macro, i, max) -> "T",
             "orDefault",
             List(),
@@ -418,6 +424,7 @@ public class Ramgen {
             letJavadoc,
             enterpriseGenerics,
 
+            Macro.MORE_GENERICS,
             (macro, i, max) -> "@Nullable " + macro.getGenericNames().get(i),
             "let",
             List("@Nullable T t"),
@@ -456,6 +463,7 @@ public class Ramgen {
             letJavadoc,
             enterpriseGenerics,
 
+            Macro.LESS_GENERICS,
             (macro, i, max) -> "void",
             "let",
             List("@Nullable T t"),
